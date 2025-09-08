@@ -3,7 +3,6 @@
 > *Your smart digestive health companion, powered by AI and designed for people with gut sensitivities.*
 
 ---
-  This is a code bundle for GutWise AI Companion. The original project is available at https://www.figma.com/design/k9hYdsoJebIyq0wejP1nUD/GutWise-AI-Companion.
 
   ## Running the code
 
