@@ -7,7 +7,6 @@ import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
 import { Camera, MapPin, Clock, Plus, Mic, Type, Scan, Loader2 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { mealsAPI } from "../utils/api/index";
 
 interface MealLoggerProps {
   dish?: any;
@@ -30,7 +29,6 @@ export function MealLogger({ dish, restaurant, onNavigate, onBack }: MealLoggerP
   const [isListening, setIsListening] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const commonTags = [
     'Gluten-free', 'Dairy-free', 'Low FODMAP', 'High fiber', 
@@ -87,12 +85,10 @@ export function MealLogger({ dish, restaurant, onNavigate, onBack }: MealLoggerP
 
   const handleSaveMeal = async () => {
     if (!mealData.dishName.trim()) {
-      setError("Please enter a dish name");
       return;
     }
 
     setIsLoading(true);
-    setError("");
 
     // Create the meal data payload
     const mealPayload = {
@@ -107,43 +103,19 @@ export function MealLogger({ dish, restaurant, onNavigate, onBack }: MealLoggerP
 
     console.log('Logging meal:', mealPayload);
 
-    try {
-      // Try to save to real database with authentication
-      const response = await mealsAPI.logMeal(mealPayload);
-      console.log('Meal saved successfully:', response);
-      
-      // Use the real meal data from the response if available
-      const savedMeal = response.meal || {
-        id: `meal_${Date.now()}`,
-        ...mealPayload,
-        created_at: new Date().toISOString(),
-      };
-      
-      setTimeout(() => {
-        console.log('Continuing with saved meal:', savedMeal);
-        onNavigate('meal-logged-success', { meal: savedMeal });
-        setIsLoading(false);
-      }, 1000);
-      
-    } catch (err) {
-      const errorMessage = err?.message || err || 'Failed to save meal';
-      console.error('Meal save failed:', errorMessage);
-      
-      // Create mock meal as fallback but show the error
-      const mockMeal = {
-        id: `meal_${Date.now()}`,
-        ...mealPayload,
-        created_at: new Date().toISOString(),
-      };
-
-      // Continue with mock data but inform user about the issue
-      setTimeout(() => {
-        console.log('Continuing with mock meal due to error:', mockMeal);
-        onNavigate('meal-logged-success', { meal: mockMeal });
-        setIsLoading(false);
-        // You could show a toast here about offline mode
-      }, 1000);
-    }
+    // Simple mock save - no API calls
+    const savedMeal = {
+      id: `meal_${Date.now()}`,
+      ...mealPayload,
+      created_at: new Date().toISOString(),
+    };
+    
+    // Simulate saving time
+    setTimeout(() => {
+      console.log('Mock meal saved:', savedMeal);
+      onNavigate('meal-logged-success', { meal: savedMeal });
+      setIsLoading(false);
+    }, 1500);
   };
 
   return (
@@ -380,32 +352,6 @@ export function MealLogger({ dish, restaurant, onNavigate, onBack }: MealLoggerP
             </p>
           </div>
         </>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <Card className="bg-red-500 border-red-400 p-4">
-          <div className="text-white">
-            <h3 className="text-white mb-2">⚠️ Meal Logging Error</h3>
-            <p className="text-sm mb-3">{error}</p>
-            <details className="text-xs bg-red-600 p-2 rounded">
-              <summary className="cursor-pointer mb-2">Technical Details</summary>
-              <div className="space-y-1">
-                <p>• Check browser console for detailed logs</p>
-                <p>• Database tables may not be created yet</p>
-                <p>• Server endpoint might be unreachable</p>
-                <p>• Authentication token could be invalid</p>
-              </div>
-            </details>
-            <Button 
-              onClick={() => setError("")}
-              className="mt-3 bg-red-700 hover:bg-red-800 text-white"
-              size="sm"
-            >
-              Try Again
-            </Button>
-          </div>
-        </Card>
       )}
 
       {/* Loading State */}

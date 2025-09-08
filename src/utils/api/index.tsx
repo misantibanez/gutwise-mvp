@@ -310,6 +310,25 @@ export const logSymptoms = symptomsAPI.logSymptoms;
 export const getSymptoms = symptomsAPI.getSymptoms;
 export const getInsights = insightsAPI.getInsights;
 
-// Export restaurant and menu analysis APIs
-export { restaurantsAPI, menuAnalysisAPI } from './restaurants';
-export { geolocationService } from '../location/geolocation';
+// Comprehensive API service object
+export const apiService = {
+  auth: authAPI,
+  profile: profileAPI,
+  meals: mealsAPI,
+  symptoms: symptomsAPI,
+  insights: insightsAPI,
+  restaurant: restaurantAPI,
+  
+  // Direct method exports for convenience
+  signUp: authAPI.signUp,
+  signIn: authAPI.signIn,
+  signOut: authAPI.signOut,
+  signInWithGoogle: authAPI.signInWithGoogle,
+  getProfile: profileAPI.getProfile,
+  updateProfile: profileAPI.updateProfile,
+  logMeal: mealsAPI.logMeal,
+  getMeals: mealsAPI.getMeals,
+  logSymptoms: symptomsAPI.logSymptoms,
+  getSymptoms: symptomsAPI.getSymptoms,
+  getInsights: insightsAPI.getInsights,
+};

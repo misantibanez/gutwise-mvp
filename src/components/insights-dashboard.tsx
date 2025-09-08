@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { TrendingUp, TrendingDown, Calendar, Award, AlertTriangle, BarChart3, Activity, Zap, Loader2 } from "lucide-react";
-import { symptomsAPI, mealsAPI } from "../utils/api/index";
 
 interface InsightsDashboardProps {
   onBack: () => void;
@@ -29,47 +28,92 @@ interface MealEntry {
 }
 
 export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps) {
-  const [symptoms, setSymptoms] = useState<SymptomEntry[]>([]);
-  const [meals, setMeals] = useState<MealEntry[]>([]);
+  // Simple mock data - no API calls
+  const mockSymptoms: SymptomEntry[] = [
+    {
+      id: 'symptom-001',
+      overall_feeling: 'great',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-001'
+    },
+    {
+      id: 'symptom-002',
+      overall_feeling: 'good',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-002'
+    },
+    {
+      id: 'symptom-003',
+      overall_feeling: 'okay',
+      symptoms: ['mild bloating'],
+      severity_scores: { 'bloating': 2 },
+      recorded_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-003'
+    },
+    {
+      id: 'symptom-004',
+      overall_feeling: 'great',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-004'
+    },
+    {
+      id: 'symptom-005',
+      overall_feeling: 'good',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-005'
+    },
+    {
+      id: 'symptom-006',
+      overall_feeling: 'not-good',
+      symptoms: ['bloating', 'fatigue'],
+      severity_scores: { 'bloating': 4, 'fatigue': 3 },
+      recorded_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-006'
+    }
+  ];
+
+  const mockMeals: MealEntry[] = [
+    {
+      id: 'meal-001',
+      dish_name: 'Margherita Pizza',
+      restaurant_name: 'La Nonna Ristorante',
+      meal_time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      tags: ['italian', 'pizza', 'vegetarian']
+    },
+    {
+      id: 'meal-002',
+      dish_name: 'Chicken Caesar Salad',
+      restaurant_name: 'Fresh Garden Bistro',
+      meal_time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['salad', 'chicken', 'healthy']
+    },
+    {
+      id: 'meal-003',
+      dish_name: 'Pad Thai',
+      restaurant_name: 'Bangkok Kitchen',
+      meal_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['thai', 'noodles', 'spicy']
+    }
+  ];
+
+  const [symptoms] = useState<SymptomEntry[]>(mockSymptoms);
+  const [meals] = useState<MealEntry[]>(mockMeals);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  // Fetch real data on component mount
+  // Simulate loading
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError("");
-      
-      try {
-        // Fetch symptoms and meals data
-        const [symptomsResult, mealsResult] = await Promise.allSettled([
-          symptomsAPI.getSymptoms(),
-          mealsAPI.getMeals()
-        ]);
-
-        if (symptomsResult.status === 'fulfilled') {
-          setSymptoms(symptomsResult.value.symptoms || []);
-          console.log('Symptoms data loaded:', symptomsResult.value.symptoms?.length || 0, 'entries');
-        } else {
-          console.error('Failed to fetch symptoms:', symptomsResult.reason);
-        }
-
-        if (mealsResult.status === 'fulfilled') {
-          setMeals(mealsResult.value.meals || []);
-          console.log('Meals data loaded:', mealsResult.value.meals?.length || 0, 'entries');
-        } else {
-          console.error('Failed to fetch meals:', mealsResult.reason);
-        }
-
-      } catch (err) {
-        console.error('Failed to fetch insights data:', err);
-        setError("Unable to load insights data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   // Calculate statistics from real data
@@ -301,44 +345,6 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
             <div>
               <h3 className="text-white mb-2">Loading your insights...</h3>
               <p className="text-gray-400 text-sm">Analyzing your meal and symptom data</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="space-y-6" data-frame="[screen:Insights]">
-        {/* Header */}
-        <div className="flex items-center justify-between py-4">
-          <Button 
-            variant="ghost" 
-            onClick={onBack}
-            className="text-gray-300 hover:text-white hover:bg-gray-800"
-          >
-            ← Back
-          </Button>
-          <h2 className="text-white">Your Insights</h2>
-          <div></div>
-        </div>
-
-        {/* Error State */}
-        <Card className="bg-red-500/10 border-red-500/20 p-6">
-          <div className="text-center space-y-4">
-            <AlertTriangle className="w-12 h-12 text-red-400 mx-auto" />
-            <div>
-              <h3 className="text-white mb-2">Unable to load insights</h3>
-              <p className="text-gray-400 text-sm">{error}</p>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="mt-4 bg-red-600 hover:bg-red-700 text-white"
-                size="sm"
-              >
-                Try Again
-              </Button>
             </div>
           </div>
         </Card>

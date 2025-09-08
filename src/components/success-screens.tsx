@@ -34,20 +34,31 @@ export function SuccessScreen({ type, onNavigate }: SuccessScreenProps) {
           </div>
         </Card>
 
-        <div className="space-y-2 w-full max-w-sm">
+        <div className="space-y-3 w-full max-w-sm">
           <Button 
             onClick={() => onNavigate('home')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 shadow-lg"
           >
-            Back to Home
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Back to Dashboard
           </Button>
-          <Button 
-            onClick={() => onNavigate('restaurants')}
-            variant="outline"
-            className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-          >
-            Find More Safe Options
-          </Button>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              onClick={() => onNavigate('log-meal')}
+              className="bg-green-600 hover:bg-green-700 text-white py-3 flex items-center justify-center space-x-1"
+            >
+              <span>+</span>
+              <span>Log Meal</span>
+            </Button>
+            <Button 
+              onClick={() => onNavigate('restaurants')}
+              className="bg-purple-600 hover:bg-purple-700 text-white py-3 flex items-center justify-center space-x-1 text-sm"
+            >
+              <span>🍽️</span>
+              <span>Find Food</span>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -76,20 +87,31 @@ export function SuccessScreen({ type, onNavigate }: SuccessScreenProps) {
           </div>
         </Card>
 
-        <div className="space-y-2 w-full max-w-sm">
+        <div className="space-y-3 w-full max-w-sm">
           <Button 
             onClick={() => onNavigate('insights')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white py-3 shadow-lg"
           >
+            <TrendingUp className="w-4 h-4 mr-2" />
             View Your Progress
           </Button>
-          <Button 
-            onClick={() => onNavigate('home')}
-            variant="outline"
-            className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-          >
-            Back to Home
-          </Button>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              onClick={() => onNavigate('home')}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-3 flex items-center justify-center space-x-1"
+            >
+              <CheckCircle className="w-4 h-4" />
+              <span>Dashboard</span>
+            </Button>
+            <Button 
+              onClick={() => onNavigate('log-meal')}
+              className="bg-green-600 hover:bg-green-700 text-white py-3 flex items-center justify-center space-x-1"
+            >
+              <span>+</span>
+              <span>Log Meal</span>
+            </Button>
+          </div>
         </div>
       </div>
     );

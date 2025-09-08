@@ -84,38 +84,44 @@ export function MealLoggedSuccess({ onNavigate, meal }: MealLoggedSuccessProps) 
 
       {/* Action Buttons */}
       <div className="space-y-3 pt-4">
+        {/* Primary Action - Back to Dashboard */}
         <Button 
           onClick={() => onNavigate('home')}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 shadow-lg"
         >
+          <CheckCircle className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Button>
         
-        {/* Quick Symptom Check Button */}
+        {/* Quick Symptom Check Button - High Priority */}
         {meal && (
           <Button 
             onClick={() => onNavigate('symptom-tracker', { meal })}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3"
+            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 shadow-lg"
           >
+            <Clock className="w-4 h-4 mr-2" />
             Log Symptoms Now
           </Button>
         )}
         
-        <Button 
-          onClick={() => onNavigate('log-meal')}
-          variant="outline"
-          className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-        >
-          Log Another Meal
-        </Button>
-        
-        <Button 
-          onClick={() => onNavigate('insights')}
-          variant="ghost"
-          className="w-full text-gray-400 hover:text-white hover:bg-gray-800"
-        >
-          View Insights
-        </Button>
+        {/* Secondary Actions */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <Button 
+            onClick={() => onNavigate('log-meal')}
+            className="bg-green-600 hover:bg-green-700 text-white py-3 flex items-center justify-center space-x-2"
+          >
+            <span>+</span>
+            <span>Log Another</span>
+          </Button>
+          
+          <Button 
+            onClick={() => onNavigate('insights')}
+            className="bg-orange-600 hover:bg-orange-700 text-white py-3 flex items-center justify-center space-x-2"
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span>View Insights</span>
+          </Button>
+        </div>
       </div>
     </div>
   );

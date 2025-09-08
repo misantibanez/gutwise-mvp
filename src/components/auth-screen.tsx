@@ -4,92 +4,52 @@ import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Heart, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { supabase } from "../utils/supabase/client";
 
 interface AuthScreenProps {
   onNavigate: (screen: string) => void;
-  onAuthSuccess?: (user: any) => void;
+  onAuthSuccess: (user: any) => void;
+  onBack: () => void;
 }
 
-export function AuthScreen({ onNavigate, onAuthSuccess }: AuthScreenProps) {
+export function AuthScreen({ onNavigate, onAuthSuccess, onBack }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
-    try {
-      if (isLogin) {
-        // Sign in existing user
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password
-        });
-
-        if (error) {
-          setError(error.message);
-        } else if (data.user) {
-          console.log('Sign in successful:', data.user.email);
-          // onAuthSuccess will be called by the auth state listener in App.tsx
-        }
-      } else {
-        // Sign up new user
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: password,
-          options: {
-            data: {
-              name: name.trim() || email.split('@')[0]
-            }
-          }
-        });
-
-        if (error) {
-          setError(error.message);
-        } else if (data.user) {
-          console.log('Sign up successful:', data.user.email);
-          setError(""); // Clear any previous errors
-          // Navigate to email verification screen
-          onNavigate('email-verification', { userEmail: email.trim() });
-        }
-      }
-    } catch (err: any) {
-      console.error('Auth error:', err);
-      setError(err.message || 'Authentication failed');
-    } finally {
+    // Simple mock authentication - no API calls
+    setTimeout(() => {
+      const mockUser = {
+        name: name.trim() || email.split('@')[0] || 'Demo User',
+        email: email || 'demo@gutwise.com'
+      };
+      
+      console.log('Mock auth successful:', mockUser);
+      onAuthSuccess(mockUser);
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleOAuthSignIn = (provider: string) => {
     setIsLoading(true);
-    setError("");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-
-      if (error) {
-        setError(error.message);
-      }
-      // OAuth will redirect, so we don't need to handle success here
-    } catch (err: any) {
-      console.error('OAuth error:', err);
-      setError(err.message || 'OAuth sign in failed');
-    } finally {
+    
+    // Simple mock OAuth
+    setTimeout(() => {
+      const mockUser = {
+        name: `Demo User (${provider})`,
+        email: `demo@${provider}.com`
+      };
+      
+      console.log(`Mock ${provider} auth successful:`, mockUser);
+      onAuthSuccess(mockUser);
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -179,13 +139,6 @@ export function AuthScreen({ onNavigate, onAuthSuccess }: AuthScreenProps) {
           >
             {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
           </Button>
-          
-          {/* Error Display */}
-          {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
         </form>
 
         <div className="mt-6">
@@ -200,7 +153,7 @@ export function AuthScreen({ onNavigate, onAuthSuccess }: AuthScreenProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={handleGoogleSignIn}
+              onClick={() => handleOAuthSignIn('google')}
               className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700"
               disabled={isLoading}
             >
@@ -209,10 +162,22 @@ export function AuthScreen({ onNavigate, onAuthSuccess }: AuthScreenProps) {
             <Button
               type="button"
               variant="outline"
+              onClick={() => handleOAuthSignIn('apple')}
               className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700"
               disabled={isLoading}
             >
               Continue with Apple
+            </Button>
+            
+            {/* Skip Demo Button */}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onAuthSuccess()}
+              className="w-full text-gray-400 hover:text-white hover:bg-gray-700"
+              disabled={isLoading}
+            >
+              Skip - Try Demo
             </Button>
           </div>
         </div>

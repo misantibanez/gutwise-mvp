@@ -16,7 +16,8 @@ import {
   Calendar,
   CheckCircle,
   ExternalLink,
-  Activity
+  Activity,
+  Utensils
 } from "lucide-react";
 
 interface ProfileScreenProps {
@@ -29,19 +30,63 @@ interface ProfileScreenProps {
 export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileScreenProps) {
   const [floConnected, setFloConnected] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(['IBS', 'Lactose Intolerance']);
+  const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>(['Gluten-free', 'Low FODMAP']);
+
+  const healthConditions = [
+    'IBS (Irritable Bowel Syndrome)',
+    'Crohn\'s Disease',
+    'Ulcerative Colitis',
+    'Celiac Disease',
+    'Lactose Intolerance',
+    'SIBO (Small Intestinal Bacterial Overgrowth)',
+    'Gastroparesis',
+    'GERD (Gastroesophageal Reflux Disease)',
+    'Food Allergies',
+    'Non-specific digestive sensitivity'
+  ];
+
+  const dietaryRestrictions = [
+    'Vegetarian',
+    'Vegan',
+    'Gluten-free',
+    'Dairy-free',
+    'Nut-free',
+    'Soy-free',
+    'Egg-free',
+    'Shellfish-free',
+    'Low FODMAP',
+    'Keto',
+    'Paleo',
+    'Mediterranean',
+    'Low sodium',
+    'Low sugar',
+    'Kosher',
+    'Halal'
+  ];
+
+  const toggleCondition = (condition: string) => {
+    setSelectedConditions(prev => 
+      prev.includes(condition)
+        ? prev.filter(c => c !== condition)
+        : [...prev, condition]
+    );
+  };
+
+  const toggleRestriction = (restriction: string) => {
+    setSelectedRestrictions(prev => 
+      prev.includes(restriction)
+        ? prev.filter(r => r !== restriction)
+        : [...prev, restriction]
+    );
+  };
 
   const menuItems = [
     {
       icon: <User className="w-5 h-5" />,
-      title: "Personal Information",
+      title: "Personal Information", 
       subtitle: "Update your profile details",
       action: () => {}
-    },
-    {
-      icon: <Activity className="w-5 h-5" />,
-      title: "Health Conditions",
-      subtitle: "Manage your digestive conditions",
-      action: () => onNavigate('health-conditions')
     },
     {
       icon: <Bell className="w-5 h-5" />,
@@ -55,7 +100,7 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     {
       icon: <Shield className="w-5 h-5" />,
       title: "Privacy & Data",
-      subtitle: "Manage your data preferences",
+      subtitle: "Manage your data preferences", 
       action: () => {}
     },
     {
@@ -76,27 +121,25 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
   };
 
   const handleSignOut = async () => {
-    try {
-      // Import Supabase client and sign out
-      const { supabase } = await import('../utils/supabase/client');
-      await supabase.auth.signOut();
-      
-      console.log('User signed out successfully');
-      
-      if (onSignOut) {
-        onSignOut();
-      }
-    } catch (error) {
-      console.error('Sign out error:', error);
-      // Fallback to just navigate to welcome
-      if (onSignOut) {
-        onSignOut();
-      }
+    // Simple mock sign out - no API calls
+    console.log('Mock sign out');
+    
+    if (onSignOut) {
+      onSignOut();
+    } else {
+      // Navigate to home or welcome screen
+      onNavigate('home');
     }
   };
 
-  const displayName = user?.name || user?.email?.split('@')[0] || 'Demo User';
-  const displayEmail = user?.email || 'demo@gutwise.com';
+  // Mock user data
+  const mockUser = {
+    name: 'Demo User',
+    email: 'demo@gutwise.com'
+  };
+
+  const displayName = user?.name || mockUser.name;
+  const displayEmail = user?.email || mockUser.email;
 
   return (
     <div className="space-y-6" data-frame="[screen:Profile]">
@@ -255,6 +298,104 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
           </Card>
         ))}
       </div>
+
+      {/* Health Conditions */}
+      <Card className="bg-gray-800 border-gray-700 p-6">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-green-500 rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="text-white">Health Conditions</h4>
+              <p className="text-sm text-gray-400">Select your digestive conditions for personalized recommendations</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="text-sm text-gray-300">
+              Currently managing: <span className="text-green-400">{selectedConditions.length} condition{selectedConditions.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+              {healthConditions.map(condition => {
+                const isSelected = selectedConditions.includes(condition);
+                return (
+                  <button
+                    key={condition}
+                    onClick={() => toggleCondition(condition)}
+                    className={`p-3 rounded-lg text-left transition-all ${
+                      isSelected 
+                        ? 'bg-blue-600 text-white border border-blue-500' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">{condition}</span>
+                      {isSelected && <CheckCircle className="w-4 h-4" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {selectedConditions.length > 0 && (
+              <div className="pt-2">
+                <p className="text-xs text-gray-400">
+                  These conditions help us personalize your food recommendations and safety scores.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Dietary Restrictions */}
+      <Card className="bg-gray-800 border-gray-700 p-6">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
+              <Utensils className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="text-white">Dietary Restrictions</h4>
+              <p className="text-sm text-gray-400">Select your dietary preferences and restrictions</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="text-sm text-gray-300">
+              Following: <span className="text-orange-400">{selectedRestrictions.length} restriction{selectedRestrictions.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+              {dietaryRestrictions.map(restriction => {
+                const isSelected = selectedRestrictions.includes(restriction);
+                return (
+                  <button
+                    key={restriction}
+                    onClick={() => toggleRestriction(restriction)}
+                    className={`p-3 rounded-lg text-left transition-all ${
+                      isSelected 
+                        ? 'bg-orange-600 text-white border border-orange-500' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">{restriction}</span>
+                      {isSelected && <CheckCircle className="w-4 h-4" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {selectedRestrictions.length > 0 && (
+              <div className="pt-2">
+                <p className="text-xs text-gray-400">
+                  These preferences help us filter restaurants and dishes that match your dietary needs.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
 
       {/* Sign Out */}
       <Card className="bg-gray-800 border-gray-700">
