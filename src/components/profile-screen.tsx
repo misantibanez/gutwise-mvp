@@ -32,6 +32,10 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
   const [notifications, setNotifications] = useState(true);
   const [selectedConditions, setSelectedConditions] = useState<string[]>(['IBS', 'Lactose Intolerance']);
   const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>(['Gluten-free', 'Low FODMAP']);
+  const [isSavingConditions, setIsSavingConditions] = useState(false);
+  const [isSavingRestrictions, setIsSavingRestrictions] = useState(false);
+  const [conditionsSaved, setConditionsSaved] = useState(false);
+  const [restrictionsSaved, setRestrictionsSaved] = useState(false);
 
   const healthConditions = [
     'IBS (Irritable Bowel Syndrome)',
@@ -64,6 +68,75 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     'Kosher',
     'Halal'
   ];
+
+  // Load saved data on component mount
+  useEffect(() => {
+    try {
+      const savedConditions = localStorage.getItem('gutwise-health-conditions');
+      const savedRestrictions = localStorage.getItem('gutwise-dietary-restrictions');
+      
+      if (savedConditions) {
+        setSelectedConditions(JSON.parse(savedConditions));
+      }
+      if (savedRestrictions) {
+        setSelectedRestrictions(JSON.parse(savedRestrictions));
+      }
+    } catch (error) {
+      console.log('Error loading saved preferences:', error);
+    }
+  }, []);
+
+  const saveHealthConditions = async () => {
+    setIsSavingConditions(true);
+    setConditionsSaved(false);
+    
+    try {
+      // Mock API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Save to localStorage for demo persistence
+      localStorage.setItem('gutwise-health-conditions', JSON.stringify(selectedConditions));
+      
+      // Mock logging for demo
+      console.log('Health conditions saved:', selectedConditions);
+      
+      setConditionsSaved(true);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => setConditionsSaved(false), 3000);
+      
+    } catch (error) {
+      console.error('Error saving health conditions:', error);
+    } finally {
+      setIsSavingConditions(false);
+    }
+  };
+
+  const saveDietaryRestrictions = async () => {
+    setIsSavingRestrictions(true);
+    setRestrictionsSaved(false);
+    
+    try {
+      // Mock API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Save to localStorage for demo persistence
+      localStorage.setItem('gutwise-dietary-restrictions', JSON.stringify(selectedRestrictions));
+      
+      // Mock logging for demo
+      console.log('Dietary restrictions saved:', selectedRestrictions);
+      
+      setRestrictionsSaved(true);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => setRestrictionsSaved(false), 3000);
+      
+    } catch (error) {
+      console.error('Error saving dietary restrictions:', error);
+    } finally {
+      setIsSavingRestrictions(false);
+    }
+  };
 
   const toggleCondition = (condition: string) => {
     setSelectedConditions(prev => 
@@ -344,6 +417,35 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
                 </p>
               </div>
             )}
+            
+            {/* Save Button for Health Conditions */}
+            <div className="pt-3 border-t border-gray-600">
+              {conditionsSaved && (
+                <div className="mb-3 p-2 bg-green-900/20 border border-green-600 rounded-lg animate-fade-in">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-sm text-green-300">Health conditions saved successfully!</span>
+                  </div>
+                </div>
+              )}
+              <Button 
+                onClick={saveHealthConditions}
+                disabled={isSavingConditions || selectedConditions.length === 0}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSavingConditions ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Save Health Conditions</span>
+                  </div>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
@@ -393,6 +495,35 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
                 </p>
               </div>
             )}
+            
+            {/* Save Button for Dietary Restrictions */}
+            <div className="pt-3 border-t border-gray-600">
+              {restrictionsSaved && (
+                <div className="mb-3 p-2 bg-green-900/20 border border-green-600 rounded-lg animate-fade-in">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-sm text-green-300">Dietary restrictions saved successfully!</span>
+                  </div>
+                </div>
+              )}
+              <Button 
+                onClick={saveDietaryRestrictions}
+                disabled={isSavingRestrictions || selectedRestrictions.length === 0}
+                className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSavingRestrictions ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Save Dietary Restrictions</span>
+                  </div>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
