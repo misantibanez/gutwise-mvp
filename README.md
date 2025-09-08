@@ -1,2 +1,11 @@
-# gutwise-mvp
-GutWise is an AI-powered companion for people with digestive sensitivities. It detects restaurants, analyzes menus, and uses health history to suggest safe food choices. With quick meal logging and symptom check-ins, it builds personalized insights for healthier, more confident living.
+
+  # GutWise AI Companion
+
+  This is a code bundle for GutWise AI Companion. The original project is available at https://www.figma.com/design/k9hYdsoJebIyq0wejP1nUD/GutWise-AI-Companion.
+
+  ## Running the code
+
+  Run `npm i` to install the dependencies.
+
+  Run `npm run dev` to start the development server.
+  
