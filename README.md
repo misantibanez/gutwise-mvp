@@ -30,7 +30,7 @@ Our killer feature: **location-aware restaurant guidance**. GutWise detects wher
 ---
 
 ## 🏗️ Tech Stack
-- **Frontend**: Figma + Bravo Studio (no-code app prototyping)  
+- **Frontend**: Figma (no-code app prototyping)  
 - **Backend**: Azure (Auth, Storage, Edge Functions)  
 - **AI**: Azure OpenAI (recommendations) + Cognitive Services OCR (menus)  
 - **Notifications**: OneSignal / Expo Push (planned)  
