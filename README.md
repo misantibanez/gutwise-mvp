@@ -3,7 +3,6 @@
 > *Your smart digestive health companion, powered by AI and designed for people with gut sensitivities.*
 
 ---
-  This is a code bundle for GutWise AI Companion. The original project is available at https://www.figma.com/design/k9hYdsoJebIyq0wejP1nUD/GutWise-AI-Companion.
 
   ## Running the code
 
@@ -31,7 +30,7 @@ Our killer feature: **location-aware restaurant guidance**. GutWise detects wher
 ---
 
 ## 🏗️ Tech Stack
-- **Frontend**: Figma + Bravo Studio (no-code app prototyping)  
+- **Frontend**: Figma (no-code app prototyping)  
 - **Backend**: Azure (Auth, Storage, Edge Functions)  
 - **AI**: Azure OpenAI (recommendations) + Cognitive Services OCR (menus)  
 - **Notifications**: OneSignal / Expo Push (planned)  
