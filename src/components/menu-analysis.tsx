@@ -1,7 +1,7 @@
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { CheckCircle, AlertTriangle, XCircle, Info, MapPin, Clock, Star, Phone, ExternalLink } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Info, MapPin, Clock, Star } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface MenuAnalysisProps {
@@ -186,7 +186,7 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
           </div>
 
           {/* Safety Analysis */}
-          <div className="bg-gray-900/50 rounded-lg p-3 mb-4">
+          <div className="bg-gray-900/50 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-300 font-medium">Menu Safety Analysis</span>
               <Badge className="bg-blue-600/20 text-blue-400 border-0 text-xs">
@@ -209,24 +209,6 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              Call
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Directions
-            </Button>
           </div>
         </div>
       </Card>

@@ -4,6 +4,7 @@ import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
 import { Badge } from "./ui/badge";
+import { ProfileAPI } from "../utils/api/profile-api";
 import { 
   User, 
   Settings, 
@@ -71,19 +72,51 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
 
   // Load saved data on component mount
   useEffect(() => {
-    try {
-      const savedConditions = localStorage.getItem('gutwise-health-conditions');
-      const savedRestrictions = localStorage.getItem('gutwise-dietary-restrictions');
-      
-      if (savedConditions) {
-        setSelectedConditions(JSON.parse(savedConditions));
+    const loadUserData = async () => {
+      try {
+        // First try to load from API
+        const userId = ProfileAPI.getCurrentUserId();
+        const userProfile = await ProfileAPI.getUserProfile(userId);
+        
+        if (userProfile?.healthConditions) {
+          setSelectedConditions(userProfile.healthConditions);
+        }
+        
+        if (userProfile?.dietaryRestrictions) {
+          setSelectedRestrictions(userProfile.dietaryRestrictions);
+        }
+        
+        // Fallback to localStorage if API data is not available
+        if (!userProfile?.healthConditions) {
+          const savedConditions = localStorage.getItem('gutwise-health-conditions');
+          if (savedConditions) {
+            setSelectedConditions(JSON.parse(savedConditions));
+          }
+        }
+        
+        if (!userProfile?.dietaryRestrictions) {
+          const savedRestrictions = localStorage.getItem('gutwise-dietary-restrictions');
+          if (savedRestrictions) {
+            setSelectedRestrictions(JSON.parse(savedRestrictions));
+          }
+        }
+      } catch (error) {
+        console.log('Error loading user data, using localStorage fallback:', error);
+        
+        // Fallback to localStorage
+        const savedConditions = localStorage.getItem('gutwise-health-conditions');
+        const savedRestrictions = localStorage.getItem('gutwise-dietary-restrictions');
+        
+        if (savedConditions) {
+          setSelectedConditions(JSON.parse(savedConditions));
+        }
+        if (savedRestrictions) {
+          setSelectedRestrictions(JSON.parse(savedRestrictions));
+        }
       }
-      if (savedRestrictions) {
-        setSelectedRestrictions(JSON.parse(savedRestrictions));
-      }
-    } catch (error) {
-      console.log('Error loading saved preferences:', error);
-    }
+    };
+
+    loadUserData();
   }, []);
 
   const saveHealthConditions = async () => {
@@ -91,14 +124,19 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     setConditionsSaved(false);
     
     try {
-      // Mock API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const userId = ProfileAPI.getCurrentUserId();
       
-      // Save to localStorage for demo persistence
+      // Try to save to API first
+      const apiSuccess = await ProfileAPI.updateHealthConditions(userId, selectedConditions);
+      
+      if (apiSuccess) {
+        console.log('Health conditions saved to API:', selectedConditions);
+      } else {
+        console.log('API save failed, saving to localStorage');
+      }
+      
+      // Also save to localStorage as backup/demo persistence
       localStorage.setItem('gutwise-health-conditions', JSON.stringify(selectedConditions));
-      
-      // Mock logging for demo
-      console.log('Health conditions saved:', selectedConditions);
       
       setConditionsSaved(true);
       
@@ -107,6 +145,11 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
       
     } catch (error) {
       console.error('Error saving health conditions:', error);
+      
+      // Fallback to localStorage only
+      localStorage.setItem('gutwise-health-conditions', JSON.stringify(selectedConditions));
+      setConditionsSaved(true);
+      setTimeout(() => setConditionsSaved(false), 3000);
     } finally {
       setIsSavingConditions(false);
     }
@@ -117,14 +160,19 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     setRestrictionsSaved(false);
     
     try {
-      // Mock API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const userId = ProfileAPI.getCurrentUserId();
       
-      // Save to localStorage for demo persistence
+      // Try to save to API first
+      const apiSuccess = await ProfileAPI.updateDietaryRestrictions(userId, selectedRestrictions);
+      
+      if (apiSuccess) {
+        console.log('Dietary restrictions saved to API:', selectedRestrictions);
+      } else {
+        console.log('API save failed, saving to localStorage');
+      }
+      
+      // Also save to localStorage as backup/demo persistence
       localStorage.setItem('gutwise-dietary-restrictions', JSON.stringify(selectedRestrictions));
-      
-      // Mock logging for demo
-      console.log('Dietary restrictions saved:', selectedRestrictions);
       
       setRestrictionsSaved(true);
       
@@ -133,6 +181,11 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
       
     } catch (error) {
       console.error('Error saving dietary restrictions:', error);
+      
+      // Fallback to localStorage only
+      localStorage.setItem('gutwise-dietary-restrictions', JSON.stringify(selectedRestrictions));
+      setRestrictionsSaved(true);
+      setTimeout(() => setRestrictionsSaved(false), 3000);
     } finally {
       setIsSavingRestrictions(false);
     }

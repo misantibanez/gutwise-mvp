@@ -9,9 +9,10 @@ interface AuthScreenProps {
   onNavigate: (screen: string) => void;
   onAuthSuccess: (user: any) => void;
   onBack: () => void;
+  onSignIn?: () => void;
 }
 
-export function AuthScreen({ onNavigate, onAuthSuccess, onBack }: AuthScreenProps) {
+export function AuthScreen({ onNavigate, onAuthSuccess, onBack, onSignIn }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -23,23 +24,49 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack }: AuthScreenProp
     e.preventDefault();
     setIsLoading(true);
 
-    // Simple mock authentication - no API calls
-    setTimeout(() => {
-      const mockUser = {
-        name: name.trim() || email.split('@')[0] || 'Demo User',
-        email: email || 'demo@gutwise.com'
-      };
-      
-      console.log('Mock auth successful:', mockUser);
-      onAuthSuccess(mockUser);
-      setIsLoading(false);
-    }, 1000);
+    // For Azure App Service, redirect to Azure authentication
+    if (onSignIn) {
+      onSignIn();
+    } else {
+      // Fallback mock authentication for development
+      setTimeout(() => {
+        const mockUser = {
+          name: name.trim() || email.split('@')[0] || 'Demo User',
+          email: email || 'demo@gutwise.com'
+        };
+        
+        console.log('Mock auth successful:', mockUser);
+        onAuthSuccess(mockUser);
+        setIsLoading(false);
+      }, 1000);
+    }
+  };
+
+  const handleAzureSignIn = () => {
+    setIsLoading(true);
+    
+    if (onSignIn) {
+      // Use Azure App Service authentication
+      onSignIn();
+    } else {
+      // Fallback mock Azure auth for development
+      setTimeout(() => {
+        const mockUser = {
+          name: 'Demo User (Azure)',
+          email: 'demo@company.com'
+        };
+        
+        console.log('Mock Azure auth successful:', mockUser);
+        onAuthSuccess(mockUser);
+        setIsLoading(false);
+      }, 1000);
+    }
   };
 
   const handleOAuthSignIn = (provider: string) => {
     setIsLoading(true);
     
-    // Simple mock OAuth
+    // Simple mock OAuth for development/demo
     setTimeout(() => {
       const mockUser = {
         name: `Demo User (${provider})`,
@@ -60,96 +87,46 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack }: AuthScreenProp
           <Heart className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-white text-2xl">
-          {isLogin ? "Welcome Back" : "Join GutWise"}
+          Welcome to GutWise
         </h1>
         <p className="text-gray-400 max-w-sm mx-auto">
-          {isLogin 
-            ? "Sign in to continue your digestive wellness journey" 
-            : "Start your personalized digestive health journey"
-          }
+          Sign in with your organization account to continue your digestive wellness journey
         </p>
       </div>
 
-      {/* Auth Form */}
+      {/* Auth Options */}
       <Card className="w-full max-w-sm bg-gray-800 border-gray-700 p-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div className="space-y-2">
-              <label className="text-sm text-gray-300">Full Name</label>
-              <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-              />
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <label className="text-sm text-gray-300">Email</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm text-gray-300">Password</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 pl-10 pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {isLogin && (
-            <div className="text-right">
-              <button
-                type="button"
-                className="text-sm text-blue-400 hover:text-blue-300"
-              >
-                Forgot password?
-              </button>
-            </div>
-          )}
-
+        <div className="space-y-4">
+          {/* Primary Azure Sign In */}
           <Button
-            type="submit"
-            className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white py-2"
+            type="button"
+            onClick={handleAzureSignIn}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3"
             disabled={isLoading}
           >
-            {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Signing in...</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z"/>
+                </svg>
+                <span>Sign in with Microsoft</span>
+              </div>
+            )}
           </Button>
-        </form>
 
-        <div className="mt-6">
           <div className="relative">
             <Separator className="bg-gray-600" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-gray-800 px-2 text-sm text-gray-400">or</span>
+              <span className="bg-gray-800 px-2 text-sm text-gray-400">or for demo</span>
             </div>
           </div>
           
-          <div className="mt-4 space-y-3">
+          <div className="space-y-3">
             <Button
               type="button"
               variant="outline"
@@ -159,21 +136,15 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack }: AuthScreenProp
             >
               Continue with Google
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOAuthSignIn('apple')}
-              className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700"
-              disabled={isLoading}
-            >
-              Continue with Apple
-            </Button>
             
             {/* Skip Demo Button */}
             <Button
               type="button"
               variant="ghost"
-              onClick={() => onAuthSuccess()}
+              onClick={() => onAuthSuccess({
+                name: 'Demo User',
+                email: 'demo@gutwise.com'
+              })}
               className="w-full text-gray-400 hover:text-white hover:bg-gray-700"
               disabled={isLoading}
             >
@@ -181,21 +152,17 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack }: AuthScreenProp
             </Button>
           </div>
         </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-400">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-            {" "}
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-400 hover:text-blue-300"
-            >
-              {isLogin ? "Sign up" : "Sign in"}
-            </button>
-          </p>
-        </div>
       </Card>
+
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        onClick={onBack}
+        className="text-gray-400 hover:text-white"
+        disabled={isLoading}
+      >
+        ← Back to Welcome
+      </Button>
 
       {/* Terms */}
       <p className="text-xs text-gray-500 text-center max-w-sm leading-relaxed">

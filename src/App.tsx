@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './utils/auth/auth-context';
 import { WelcomeScreen } from './components/welcome-screen';
 import { AuthScreen } from './components/auth-screen';
 import { HomeDashboard } from './components/home-dashboard';
@@ -14,23 +15,46 @@ import { ProfileScreen } from './components/profile-screen';
 import { BottomNavigation } from './components/bottom-navigation';
 import { SuccessScreen } from './components/success-screens';
 
-export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('welcome'); // Start with welcome screen
+// Main app component that uses Azure authentication
+function MainApp() {
+  const { isAuthenticated, isLoading, user, signIn, signOut } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState('welcome');
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [screenData, setScreenData] = useState<any>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [demoUser, setDemoUser] = useState<any>(null);
+
+  // Determine if user is effectively authenticated (either Azure auth or demo mode)
+  const isEffectivelyAuthenticated = isAuthenticated || isDemoMode;
+  const effectiveUser = isAuthenticated ? user : demoUser;
+
+  // Handle authentication state changes
+  useEffect(() => {
+    if (!isLoading) {
+      if (isEffectivelyAuthenticated) {
+        // User is authenticated, show home screen
+        if (currentScreen === 'welcome' || currentScreen === 'auth') {
+          setCurrentScreen('home');
+        }
+      } else {
+        // User is not authenticated, show welcome screen
+        if (currentScreen !== 'welcome' && currentScreen !== 'auth') {
+          setCurrentScreen('welcome');
+        }
+      }
+    }
+  }, [isEffectivelyAuthenticated, isLoading, currentScreen]);
 
   // Simulate location-based check-in after being on home screen
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (currentScreen === 'home' && !showCheckIn && isAuthenticated) {
+      if (currentScreen === 'home' && !showCheckIn && isEffectivelyAuthenticated) {
         setShowCheckIn(true);
       }
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [currentScreen, showCheckIn, isAuthenticated]);
+  }, [currentScreen, showCheckIn, isEffectivelyAuthenticated]);
 
   const handleNavigate = (screen: string, data?: any) => {
     console.log('handleNavigate called with screen:', screen, 'data:', data);
@@ -40,17 +64,36 @@ export default function App() {
   };
 
   const handleAuthSuccess = (userData?: any) => {
-    console.log('Mock auth success:', userData);
-    setIsAuthenticated(true);
-    setUser(userData || { name: 'Demo User', email: 'demo@gutwise.com' });
-    setCurrentScreen('home');
+    console.log('Auth success:', userData);
+    if (userData) {
+      // This is demo mode - set demo user and demo mode
+      console.log('Setting demo mode with user:', userData);
+      setDemoUser(userData);
+      setIsDemoMode(true);
+      setCurrentScreen('home');
+    } else {
+      // Azure auth is handled by the AuthProvider, just navigate to home
+      setCurrentScreen('home');
+    }
   };
 
-  const handleSignOut = () => {
-    console.log('Mock sign out');
-    setIsAuthenticated(false);
-    setUser(null);
-    setCurrentScreen('welcome');
+  const handleSignOut = async () => {
+    console.log('Signing out');
+    if (isDemoMode) {
+      // Demo mode sign out - just clear demo state
+      setIsDemoMode(false);
+      setDemoUser(null);
+      setCurrentScreen('welcome');
+    } else {
+      // Azure sign out
+      await signOut();
+      setCurrentScreen('welcome');
+    }
+  };
+
+  const handleSignIn = () => {
+    console.log('Signing in');
+    signIn();
   };
 
   const handleBack = () => {
@@ -68,7 +111,6 @@ export default function App() {
         setCurrentScreen('home');
         break;
       case 'insights':
-        // Stay in insights or go to home if no previous context
         setCurrentScreen('home');
         break;
       case 'menu':
@@ -88,8 +130,21 @@ export default function App() {
     setScreenData(null);
   };
 
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="w-8 h-8 border-2 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading GutWise...</p>
+        </div>
+      </div>
+    );
+  }
+
   const renderScreen = () => {
-    console.log('Rendering screen:', currentScreen);
+    console.log('Rendering screen:', currentScreen, 'isAuthenticated:', isAuthenticated);
+    
     switch (currentScreen) {
       case 'welcome':
         return <WelcomeScreen onNavigate={handleNavigate} />;
@@ -100,6 +155,7 @@ export default function App() {
             onNavigate={handleNavigate}
             onAuthSuccess={handleAuthSuccess}
             onBack={handleBack}
+            onSignIn={handleSignIn}
           />
         );
       
@@ -163,7 +219,7 @@ export default function App() {
       case 'profile':
         return (
           <ProfileScreen 
-            user={user}
+            user={effectiveUser}
             onBack={handleBack} 
             onNavigate={handleNavigate}
             onSignOut={handleSignOut}
@@ -195,12 +251,16 @@ export default function App() {
         );
       
       default:
-        return <HomeDashboard onNavigate={handleNavigate} />;
+        return isAuthenticated ? (
+          <HomeDashboard onNavigate={handleNavigate} />
+        ) : (
+          <WelcomeScreen onNavigate={handleNavigate} />
+        );
     }
   };
 
-  // Don't show bottom navigation on welcome and auth screens
-  const shouldShowBottomNav = isAuthenticated && !['welcome', 'auth'].includes(currentScreen);
+  // Don't show bottom navigation on welcome and auth screens or when not authenticated
+  const shouldShowBottomNav = isEffectivelyAuthenticated && !['welcome', 'auth'].includes(currentScreen);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
@@ -219,7 +279,7 @@ export default function App() {
         )}
 
         {/* Check-in Modal */}
-        {showCheckIn && isAuthenticated && (
+        {showCheckIn && isEffectivelyAuthenticated && (
           <CheckInModal 
             onNavigate={handleNavigate}
             onClose={() => setShowCheckIn(false)}
@@ -227,5 +287,14 @@ export default function App() {
         )}
       </div>
     </div>
+  );
+}
+
+// Root App component with AuthProvider
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }
