@@ -54,6 +54,10 @@
       },
       "scripts": {
           "dev": "vite",
-          "build": "vite build"
-      }
+          "build": "vite build",
+          "start": "pm2 serve /home/site/wwwroot/build --spa --no-daemon -p $PORT"
+      },
+    "engines": {
+            "node": "20.x"
+        }
   }

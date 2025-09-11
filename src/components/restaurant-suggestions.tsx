@@ -1,8 +1,12 @@
+import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { MapPin, Star, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+
+import { MapPin, Star, Clock, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { azureMapsService, Restaurant, RestaurantResponse } from "../utils/azure-maps-service";
+import { LocationPermissionHelper } from "./location-permission-helper";
 
 interface RestaurantSuggestionsProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -10,38 +14,51 @@ interface RestaurantSuggestionsProps {
 }
 
 export function RestaurantSuggestions({ onNavigate, onBack }: RestaurantSuggestionsProps) {
-  const restaurants = [
-    {
-      id: 1,
-      name: "La Nonna Ristorante",
-      cuisine: "Italian",
-      distance: "0.2 miles",
-      rating: 4.5,
-      safeOptions: 3,
-      riskOptions: 2,
-      image: "https://images.unsplash.com/photo-1609951734391-b79a50460c6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMG1lbnUlMjBtb2JpbGV8ZW58MXx8fHwxNzU3MjU3NDk4fDA&ixlib=rb-4.1.0&q=80&w=400",
-      dishes: [
-        { name: "Grilled Salmon", status: "safe", confidence: 95 },
-        { name: "Caesar Salad (no croutons)", status: "safe", confidence: 89 },
-        { name: "Margherita Pizza", status: "caution", confidence: 60 },
-      ]
-    },
-    {
-      id: 2,
-      name: "Green Bowl Cafe",
-      cuisine: "Healthy",
-      distance: "0.4 miles",
-      rating: 4.8,
-      safeOptions: 5,
-      riskOptions: 0,
-      image: "https://images.unsplash.com/photo-1642339800099-921df1a0a958?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwZm9vZCUyMGJvd2x8ZW58MXx8fHwxNzU3MjAzNjk4fDA&ixlib=rb-4.1.0&q=80&w=400",
-      dishes: [
-        { name: "Mediterranean Quinoa Bowl", status: "safe", confidence: 98 },
-        { name: "Grilled Chicken Salad", status: "safe", confidence: 95 },
-        { name: "Buddha Bowl", status: "safe", confidence: 92 },
-      ]
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [locationStatus, setLocationStatus] = useState<string>('Getting your location...');
+  const [locationName, setLocationName] = useState<string | null>(null);
+  const [isUsingMockData, setIsUsingMockData] = useState(false);
+  const [isUsingDefaultLocation, setIsUsingDefaultLocation] = useState(false);
+
+  useEffect(() => {
+    loadNearbyRestaurants();
+  }, []);
+
+  const loadNearbyRestaurants = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setLocationStatus('Getting your location...');
+      
+      const response: RestaurantResponse = await azureMapsService.getNearbyRestaurants();
+      const { restaurants: restaurantData, isUsingDefaultLocation: usingDefault, locationName: locName } = response;
+      
+      setRestaurants(restaurantData);
+      setIsUsingDefaultLocation(usingDefault);
+      setLocationName(locName || null);
+      
+      // Check if we're using mock data (they will have IDs starting with 'mock-')
+      const usingMockData = restaurantData.some(r => r.id.startsWith('mock-'));
+      setIsUsingMockData(usingMockData);
+      
+      if (usingMockData) {
+        setLocationStatus(`Showing demo restaurants (location unavailable)`);
+      } else if (usingDefault) {
+        setLocationStatus(`Showing nearby restaurants (using default location)`);
+      } else {
+        setLocationStatus(`Found ${restaurantData.length} restaurants with safe options nearby`);
+      }
+    } catch (err) {
+      console.error('Error loading restaurants:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unable to load nearby restaurants. Please check your location permissions.';
+      setError(errorMessage);
+      setLocationStatus('Unable to access location');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   return (
     <div className="space-y-6" data-frame="[screen:Restaurants]">
@@ -58,18 +75,75 @@ export function RestaurantSuggestions({ onNavigate, onBack }: RestaurantSuggesti
         <div></div>
       </div>
 
+      {/* Location Permission Helper */}
+      <LocationPermissionHelper 
+        show={isUsingDefaultLocation && !loading && !error}
+        onRetry={loadNearbyRestaurants}
+      />
+
       {/* Location Info */}
       <Card className="bg-gray-800 border-gray-700 p-4">
         <div className="flex items-center space-x-2 mb-2">
           <MapPin className="w-4 h-4 text-blue-400" />
           <span className="text-blue-400">Your Location</span>
+          {loading && <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />}
         </div>
-        <p className="text-gray-300">Found {restaurants.length} restaurants with safe options nearby</p>
+        
+        {/* Display location name if available */}
+        {locationName && !loading && (
+          <div className="mb-2">
+            <p className="text-white font-medium">{locationName}</p>
+          </div>
+        )}
+        
+        <p className="text-gray-300 text-sm">{locationStatus}</p>
+        {(isUsingMockData || isUsingDefaultLocation) && (
+          <div className="mt-2 p-2 bg-blue-900/30 rounded border border-blue-700">
+            <p className="text-blue-300 text-xs">
+              {isUsingMockData 
+                ? "📍 Demo mode: Showing sample restaurants. Enable location for real nearby restaurants."
+                : "📍 Using default location: Enable location permissions for personalized results."
+              }
+            </p>
+          </div>
+        )}
+        {error && (
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-red-400 text-sm">{error}</p>
+            <Button 
+              onClick={loadNearbyRestaurants}
+              variant="outline"
+              size="sm"
+              className="text-blue-400 border-blue-400 hover:bg-blue-400/10"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
       </Card>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="bg-gray-800 border-gray-700 p-4">
+              <div className="flex space-x-4">
+                <div className="w-20 h-20 rounded-lg bg-gray-700 animate-pulse"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-3 bg-gray-700 rounded w-2/3 animate-pulse"></div>
+                  <div className="h-3 bg-gray-700 rounded w-1/2 animate-pulse"></div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
       {/* Restaurant List */}
-      <div className="space-y-4">
-        {restaurants.map((restaurant) => (
+      {!loading && restaurants.length > 0 && (
+        <div className="space-y-4">
+          {restaurants.map((restaurant) => (
           <Card key={restaurant.id} className="bg-gray-800 border-gray-700 p-4">
             <div className="flex space-x-4">
               <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
@@ -92,7 +166,7 @@ export function RestaurantSuggestions({ onNavigate, onBack }: RestaurantSuggesti
                   </div>
                   <div className="flex items-center space-x-1">
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-300">{restaurant.rating}</span>
+                    <span className="text-sm text-gray-300">{restaurant.rating.toFixed(1)}</span>
                   </div>
                 </div>
 
@@ -137,7 +211,25 @@ export function RestaurantSuggestions({ onNavigate, onBack }: RestaurantSuggesti
             </div>
           </Card>
         ))}
-      </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && restaurants.length === 0 && !error && (
+        <Card className="bg-gray-800 border-gray-700 p-8 text-center">
+          <MapPin className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-white mb-2">No Restaurants Found</h3>
+          <p className="text-gray-400 mb-4">
+            We couldn't find any restaurants in your area. Try expanding your search radius or check your location settings.
+          </p>
+          <Button 
+            onClick={loadNearbyRestaurants}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Try Again
+          </Button>
+        </Card>
+      )}
     </div>
   );
 }

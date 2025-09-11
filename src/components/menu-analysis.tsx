@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { CheckCircle, AlertTriangle, XCircle, Info, MapPin, Clock, Star } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Info, MapPin, Clock, Star, Loader2 } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { menuAnalysisService, AnalyzedMenuItem } from "../utils/menu-analysis-service";
 
 interface MenuAnalysisProps {
   restaurant: any;
@@ -11,6 +13,13 @@ interface MenuAnalysisProps {
 }
 
 export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisProps) {
+  const [menuItems, setMenuItems] = useState<AnalyzedMenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [safeCount, setSafeCount] = useState(0);
+  const [cautionCount, setCautionCount] = useState(0);
+  const [avoidCount, setAvoidCount] = useState(0);
+
   // Mock restaurant data with enhanced details
   const defaultRestaurant = {
     name: "La Nonna Ristorante",
@@ -35,53 +44,43 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
     features: restaurant?.features || defaultRestaurant.features
   };
 
-  const menuItems = [
-    {
-      id: 1,
-      name: "Mediterranean Quinoa Bowl",
-      description: "Quinoa, cucumber, tomatoes, olives, feta cheese, olive oil dressing",
-      status: "safe",
-      confidence: 98,
-      reasons: ["Low FODMAP ingredients", "No gluten", "Anti-inflammatory", "Previous positive reactions"],
-      triggers: []
-    },
-    {
-      id: 2,
-      name: "Grilled Chicken Salad",
-      description: "Mixed greens, grilled chicken, avocado, cherry tomatoes",
-      status: "safe",
-      confidence: 95,
-      reasons: ["Simple ingredients", "No dairy", "Lean protein", "Good fiber balance"],
-      triggers: []
-    },
-    {
-      id: 3,
-      name: "Buddha Bowl",
-      description: "Brown rice, roasted vegetables, chickpeas, tahini dressing",
-      status: "safe",
-      confidence: 92,
-      reasons: ["Whole grains", "Plant-based protein", "Familiar ingredients"],
-      triggers: []
-    },
-    {
-      id: 4,
-      name: "Spicy Thai Curry",
-      description: "Coconut curry with vegetables, jasmine rice, chili peppers",
-      status: "caution",
-      confidence: 45,
-      reasons: ["High fiber vegetables"],
-      triggers: ["Spicy ingredients", "Coconut (high FODMAP)", "Onions in curry base"]
-    },
-    {
-      id: 5,
-      name: "Loaded Burrito Bowl",
-      description: "Black beans, corn, cheese, sour cream, guacamole, salsa",
-      status: "avoid",
-      confidence: 15,
-      reasons: [],
-      triggers: ["High FODMAP beans", "Dairy products", "Onions in salsa", "High fat content"]
-    }
-  ];
+  // Load and analyze menu items
+  useEffect(() => {
+    const loadMenu = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Generate mock menu items for this restaurant
+        const mockItems = menuAnalysisService.generateMockMenuItems(restaurantData.name);
+        
+        // Analyze all items using the Azure Function API
+        const analyzedItems = await menuAnalysisService.analyzeMultipleItems(
+          mockItems, 
+          { name: restaurantData.name }
+        );
+
+        setMenuItems(analyzedItems);
+
+        // Calculate and update dynamic counts based on actual analysis
+        const safeItems = analyzedItems.filter(item => item.status === 'safe').length;
+        const cautionItems = analyzedItems.filter(item => item.status === 'caution').length;
+        const avoidItems = analyzedItems.filter(item => item.status === 'avoid').length;
+        
+        setSafeCount(safeItems);
+        setCautionCount(cautionItems);
+        setAvoidCount(avoidItems);
+
+      } catch (err) {
+        console.error('Error loading menu:', err);
+        setError('Unable to analyze menu. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMenu();
+  }, [restaurantData.name]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -99,6 +98,41 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
       case 'avoid': return <XCircle className="w-4 h-4" />;
       default: return <Info className="w-4 h-4" />;
     }
+  };
+
+  const retryAnalysis = () => {
+    // Trigger a re-analysis by changing the key or re-running the effect
+    setMenuItems([]);
+    setError(null);
+    setLoading(true);
+    
+    // Re-run the analysis
+    const loadMenu = async () => {
+      try {
+        const mockItems = menuAnalysisService.generateMockMenuItems(restaurantData.name);
+        const analyzedItems = await menuAnalysisService.analyzeMultipleItems(
+          mockItems, 
+          { name: restaurantData.name }
+        );
+        setMenuItems(analyzedItems);
+        
+        // Update counts for retry as well
+        const safeItems = analyzedItems.filter(item => item.status === 'safe').length;
+        const cautionItems = analyzedItems.filter(item => item.status === 'caution').length;
+        const avoidItems = analyzedItems.filter(item => item.status === 'avoid').length;
+        
+        setSafeCount(safeItems);
+        setCautionCount(cautionItems);
+        setAvoidCount(avoidItems);
+      } catch (err) {
+        console.error('Error retrying menu analysis:', err);
+        setError('Unable to analyze menu. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMenu();
   };
 
   return (
@@ -154,7 +188,7 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
             {/* Rating */}
             <div className="flex items-center space-x-1 text-right">
               <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-yellow-400 font-medium">{restaurantData.rating}</span>
+              <span className="text-yellow-400 font-medium">{Number(restaurantData.rating).toFixed(1)}</span>
             </div>
           </div>
 
@@ -190,22 +224,35 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-300 font-medium">Menu Safety Analysis</span>
               <Badge className="bg-blue-600/20 text-blue-400 border-0 text-xs">
-                AI Analyzed
+                {loading ? 'Analyzing...' : 'AI Analyzed'}
               </Badge>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-400" />
                 <div>
-                  <span className="text-lg font-medium text-green-400">{restaurantData.safeOptions}</span>
+                  <span className="text-lg font-medium text-green-400">
+                    {loading ? '...' : safeCount}
+                  </span>
                   <p className="text-xs text-gray-400">Safe Options</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="w-4 h-4 text-yellow-400" />
                 <div>
-                  <span className="text-lg font-medium text-yellow-400">{restaurantData.riskOptions}</span>
+                  <span className="text-lg font-medium text-yellow-400">
+                    {loading ? '...' : cautionCount}
+                  </span>
                   <p className="text-xs text-gray-400">Review Needed</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <XCircle className="w-4 h-4 text-red-400" />
+                <div>
+                  <span className="text-lg font-medium text-red-400">
+                    {loading ? '...' : avoidCount}
+                  </span>
+                  <p className="text-xs text-gray-400">Not Recommended</p>
                 </div>
               </div>
             </div>
@@ -213,77 +260,121 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
         </div>
       </Card>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-3" />
+              <p className="text-blue-400 font-medium">Analyzing menu with AI...</p>
+              <p className="text-sm text-gray-400 mt-1">This may take a few moments</p>
+            </div>
+          </div>
+          {/* Loading skeletons */}
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="bg-gray-800 border-gray-700 p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-2 animate-pulse"></div>
+                  <div className="h-3 bg-gray-700 rounded w-full animate-pulse"></div>
+                </div>
+                <div className="w-16 h-6 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <Card className="bg-red-900/20 border-red-700 p-4">
+          <div className="flex items-center space-x-2 mb-3">
+            <XCircle className="w-5 h-5 text-red-400" />
+            <span className="text-red-400 font-medium">Analysis Failed</span>
+          </div>
+          <p className="text-red-300 text-sm mb-4">{error}</p>
+          <Button 
+            onClick={retryAnalysis}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Try Again
+          </Button>
+        </Card>
+      )}
+
       {/* Menu Items */}
-      <div className="space-y-3">
-        {menuItems.map((item) => (
-          <Card key={item.id} className="bg-gray-800 border-gray-700 p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <h4 className="text-white mb-1">{item.name}</h4>
-                <p className="text-sm text-gray-400 mb-2">{item.description}</p>
-              </div>
-              <div className="text-right ml-4">
-                <Badge className={`${getStatusColor(item.status)} border-0`}>
-                  <div className="flex items-center space-x-1">
-                    {getStatusIcon(item.status)}
-                    <span>{item.confidence}%</span>
-                  </div>
-                </Badge>
-              </div>
-            </div>
-
-            {/* Analysis Details */}
-            <div className="space-y-2 mt-3">
-              {item.reasons.length > 0 && (
-                <div>
-                  <div className="flex items-center space-x-1 mb-1">
-                    <CheckCircle className="w-3 h-3 text-green-400" />
-                    <span className="text-xs text-green-400 uppercase tracking-wide">Good for you</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {item.reasons.map((reason, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-green-400 text-green-300">
-                        {reason}
-                      </Badge>
-                    ))}
-                  </div>
+      {!loading && !error && menuItems.length > 0 && (
+        <div className="space-y-3">
+          {menuItems.map((item) => (
+            <Card key={item.id} className="bg-gray-800 border-gray-700 p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <h4 className="text-white mb-1">{item.name}</h4>
+                  <p className="text-sm text-gray-400 mb-2">{item.description}</p>
                 </div>
-              )}
-
-              {item.triggers.length > 0 && (
-                <div>
-                  <div className="flex items-center space-x-1 mb-1">
-                    <AlertTriangle className="w-3 h-3 text-yellow-400" />
-                    <span className="text-xs text-yellow-400 uppercase tracking-wide">Potential triggers</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {item.triggers.map((trigger, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-yellow-400 text-yellow-300">
-                        {trigger}
-                      </Badge>
-                    ))}
-                  </div>
+                <div className="text-right ml-4">
+                  <Badge className={`${getStatusColor(item.status)} border-0`}>
+                    <div className="flex items-center space-x-1">
+                      {getStatusIcon(item.status)}
+                      <span>{item.confidence}%</span>
+                    </div>
+                  </Badge>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Action Button */}
-            <Button 
-              onClick={() => onNavigate('log-meal', { dish: item, restaurant })}
-              className={`w-full mt-3 ${
-                item.status === 'safe' 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : item.status === 'caution'
-                    ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                    : 'bg-gray-600 hover:bg-gray-700 text-white'
-              }`}
-              disabled={item.status === 'avoid'}
-            >
-              {item.status === 'avoid' ? 'Not Recommended' : 'Log This Meal'}
-            </Button>
-          </Card>
-        ))}
-      </div>
+              {/* Analysis Details */}
+              <div className="space-y-2 mt-3">
+                {item.reasons.length > 0 && (
+                  <div>
+                    <div className="flex items-center space-x-1 mb-1">
+                      <CheckCircle className="w-3 h-3 text-green-400" />
+                      <span className="text-xs text-green-400 uppercase tracking-wide">Good for you</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {item.reasons.map((reason, index) => (
+                        <Badge key={index} variant="outline" className="text-xs border-green-400 text-green-300">
+                          {reason}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {item.triggers.length > 0 && (
+                  <div>
+                    <div className="flex items-center space-x-1 mb-1">
+                      <AlertTriangle className="w-3 h-3 text-yellow-400" />
+                      <span className="text-xs text-yellow-400 uppercase tracking-wide">Potential triggers</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {item.triggers.map((trigger, index) => (
+                        <Badge key={index} variant="outline" className="text-xs border-yellow-400 text-yellow-300">
+                          {trigger}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <Button 
+                onClick={() => onNavigate('log-meal', { dish: item, restaurant })}
+                className={`w-full mt-3 ${
+                  item.status === 'safe' 
+                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                    : item.status === 'caution'
+                      ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                      : 'bg-gray-600 hover:bg-gray-700 text-white'
+                }`}
+                disabled={item.status === 'avoid'}
+              >
+                {item.status === 'avoid' ? 'Not Recommended' : 'Log This Meal'}
+              </Button>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
