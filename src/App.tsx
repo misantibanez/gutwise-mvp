@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './utils/auth/auth-context';
+import { checkInDismissalTracker } from './utils/check-in-dismissal';
 import { WelcomeScreen } from './components/welcome-screen';
 import { AuthScreen } from './components/auth-screen';
 import { HomeDashboard } from './components/home-dashboard';
@@ -14,6 +15,7 @@ import { AllMealsScreen } from './components/all-meals-screen';
 import { ProfileScreen } from './components/profile-screen';
 import { BottomNavigation } from './components/bottom-navigation';
 import { SuccessScreen } from './components/success-screens';
+import { Toaster } from './components/ui/sonner';
 
 // Main app component that uses Azure authentication
 function MainApp() {
@@ -45,16 +47,29 @@ function MainApp() {
     }
   }, [isEffectivelyAuthenticated, isLoading, currentScreen]);
 
-  // Simulate location-based check-in after being on home screen
+  // Handle location-based eating out check-in modal
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentScreen === 'home' && !showCheckIn && isEffectivelyAuthenticated) {
-        setShowCheckIn(true);
-      }
-    }, 5000);
+    let timer: NodeJS.Timeout;
 
-    return () => clearTimeout(timer);
-  }, [currentScreen, showCheckIn, isEffectivelyAuthenticated]);
+    if (currentScreen === 'home' && isEffectivelyAuthenticated && !showCheckIn) {
+      // Check if notifications are enabled
+      const notificationsEnabled = localStorage.getItem('gutwise-notifications-enabled') !== 'false';
+      
+      // Check if we can show the check-in modal
+      if (notificationsEnabled && checkInDismissalTracker.canShowCheckIn()) {
+        timer = setTimeout(() => {
+          setShowCheckIn(true);
+          checkInDismissalTracker.markAsShown();
+        }, 5000);
+      }
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [currentScreen, isEffectivelyAuthenticated, showCheckIn]);
 
   const handleNavigate = (screen: string, data?: any) => {
     console.log('handleNavigate called with screen:', screen, 'data:', data);
@@ -259,6 +274,12 @@ function MainApp() {
     }
   };
 
+  const handleCheckInClose = () => {
+    setShowCheckIn(false);
+    // Dismiss for 4 hours when user clicks "Not eating out"
+    checkInDismissalTracker.dismissForFourHours();
+  };
+
   // Don't show bottom navigation on welcome and auth screens or when not authenticated
   const shouldShowBottomNav = isEffectivelyAuthenticated && !['welcome', 'auth'].includes(currentScreen);
 
@@ -282,9 +303,12 @@ function MainApp() {
         {showCheckIn && isEffectivelyAuthenticated && (
           <CheckInModal 
             onNavigate={handleNavigate}
-            onClose={() => setShowCheckIn(false)}
+            onClose={handleCheckInClose}
           />
         )}
+
+        {/* Toast Notifications */}
+        <Toaster richColors position="top-center" />
       </div>
     </div>
   );

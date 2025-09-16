@@ -4,7 +4,8 @@ import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
 import { Badge } from "./ui/badge";
-import { ProfileAPI } from "../utils/api/profile-api";
+import { profileAPI } from "../utils/api";
+import { checkInDismissalTracker } from "../utils/check-in-dismissal";
 import { 
   User, 
   Settings, 
@@ -74,27 +75,27 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // First try to load from API
-        const userId = ProfileAPI.getCurrentUserId();
-        const userProfile = await ProfileAPI.getUserProfile(userId);
+        // Try to load from API
+        const result = await profileAPI.getProfile();
+        const userProfile = result.profile;
         
-        if (userProfile?.healthConditions) {
-          setSelectedConditions(userProfile.healthConditions);
+        if (userProfile?.dietary_restrictions) {
+          setSelectedRestrictions(userProfile.dietary_restrictions);
         }
         
-        if (userProfile?.dietaryRestrictions) {
-          setSelectedRestrictions(userProfile.dietaryRestrictions);
+        if (userProfile?.health_conditions) {
+          setSelectedConditions(userProfile.health_conditions);
         }
         
         // Fallback to localStorage if API data is not available
-        if (!userProfile?.healthConditions) {
+        if (!userProfile?.health_conditions) {
           const savedConditions = localStorage.getItem('gutwise-health-conditions');
           if (savedConditions) {
             setSelectedConditions(JSON.parse(savedConditions));
           }
         }
         
-        if (!userProfile?.dietaryRestrictions) {
+        if (!userProfile?.dietary_restrictions) {
           const savedRestrictions = localStorage.getItem('gutwise-dietary-restrictions');
           if (savedRestrictions) {
             setSelectedRestrictions(JSON.parse(savedRestrictions));
@@ -124,15 +125,15 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     setConditionsSaved(false);
     
     try {
-      const userId = ProfileAPI.getCurrentUserId();
+      // Save using mock data service
+      const updateResult = await profileAPI.updateProfile({
+        health_conditions: selectedConditions
+      });
       
-      // Try to save to API first
-      const apiSuccess = await ProfileAPI.updateHealthConditions(userId, selectedConditions);
-      
-      if (apiSuccess) {
-        console.log('Health conditions saved to API:', selectedConditions);
+      if (updateResult?.success) {
+        console.log('Health conditions saved via mock service:', selectedConditions);
       } else {
-        console.log('API save failed, saving to localStorage');
+        console.log('Mock service save completed, using localStorage');
       }
       
       // Also save to localStorage as backup/demo persistence
@@ -160,15 +161,15 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     setRestrictionsSaved(false);
     
     try {
-      const userId = ProfileAPI.getCurrentUserId();
+      // Save using mock data service
+      const updateResult = await profileAPI.updateProfile({
+        dietary_restrictions: selectedRestrictions
+      });
       
-      // Try to save to API first
-      const apiSuccess = await ProfileAPI.updateDietaryRestrictions(userId, selectedRestrictions);
-      
-      if (apiSuccess) {
-        console.log('Dietary restrictions saved to API:', selectedRestrictions);
+      if (updateResult?.success) {
+        console.log('Dietary restrictions saved via mock service:', selectedRestrictions);
       } else {
-        console.log('API save failed, saving to localStorage');
+        console.log('Mock service save completed, using localStorage');
       }
       
       // Also save to localStorage as backup/demo persistence
@@ -207,6 +208,16 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     );
   };
 
+  const handleNotificationToggle = (enabled: boolean) => {
+    setNotifications(enabled);
+    // Save to localStorage
+    localStorage.setItem('gutwise-notifications-enabled', enabled.toString());
+  };
+
+  const resetCheckInSettings = () => {
+    checkInDismissalTracker.reset();
+  };
+
   const menuItems = [
     {
       icon: <User className="w-5 h-5" />,
@@ -216,12 +227,12 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
     },
     {
       icon: <Bell className="w-5 h-5" />,
-      title: "Notifications",
-      subtitle: "Meal reminders and check-ins",
+      title: "Eating Out Reminders",
+      subtitle: "Location-based check-ins",
       action: () => {},
       toggle: true,
       toggleValue: notifications,
-      onToggle: setNotifications
+      onToggle: handleNotificationToggle
     },
     {
       icon: <Shield className="w-5 h-5" />,
@@ -424,6 +435,47 @@ export function ProfileScreen({ onNavigate, onBack, onSignOut, user }: ProfileSc
           </Card>
         ))}
       </div>
+
+      {/* Check-in Settings */}
+      {notifications && (
+        <Card className="bg-gray-800 border-gray-700 p-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-500 rounded-lg flex items-center justify-center">
+                <Bell className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h4 className="text-white">Check-in Settings</h4>
+                <p className="text-sm text-gray-400">Manage eating out popup reminders</p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-700 rounded-lg p-4">
+              <div className="space-y-3">
+                <p className="text-sm text-gray-300">
+                  We'll show a popup asking if you're eating out when we detect you're at home after being away. 
+                  You can dismiss it for 4 hours if you're not eating out.
+                </p>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-white text-sm">Reset Check-in Settings</div>
+                    <div className="text-xs text-gray-400">Clear dismissal preferences and restart check-ins</div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={resetCheckInSettings}
+                    className="border-blue-600 text-blue-300 hover:bg-blue-600/10"
+                  >
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Health Conditions */}
       <Card className="bg-gray-800 border-gray-700 p-6">

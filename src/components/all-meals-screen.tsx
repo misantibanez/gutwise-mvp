@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Clock, Search, Calendar, MapPin, AlertTriangle, Loader2, CheckCircle, TrendingUp, User, Activity } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { apiService } from "../utils/api";
 
 interface AllMealsScreenProps {
   onBack: () => void;
@@ -32,7 +33,7 @@ export function AllMealsScreen({ onBack, onNavigate }: AllMealsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simple mock data - no API calls
+  // Fallback mock data for when API is unavailable
   const mockMeals: MealEntry[] = [
     {
       id: 'meal-001',
@@ -80,7 +81,7 @@ export function AllMealsScreen({ onBack, onNavigate }: AllMealsScreenProps) {
       reaction: 'neutral',
       calories: 580,
       cuisine_type: 'Thai',
-      image_url: 'https://images.unsplash.com/photo-1559314809-0f31657def5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYWQlMjB0aGFpfGVufDF8fHx8MTc1NzM1Nzk0NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      image_url: 'https://images.unsplash.com/photo-1718964313403-2db158f67844?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYWQlMjB0aGFpJTIwbm9vZGxlc3xlbnwxfHx8fDE3NTc5NjEzMTB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
     },
     {
       id: 'meal-004',
@@ -164,14 +165,36 @@ export function AllMealsScreen({ onBack, onNavigate }: AllMealsScreenProps) {
     }
   ];
 
-  const [meals] = useState<MealEntry[]>(mockMeals);
+  const [meals, setMeals] = useState<MealEntry[]>([]);
 
-  // Simulate loading
+  // Load meals from API (mock data service)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
+    const loadMeals = async () => {
+      try {
+        console.log('🔄 Loading meals from API...');
+        
+        // Get meals from mock data service
+        
+        // Get meals from API (tries Cosmos DB first, falls back to mock)
+        const result = await apiService.meals.getMeals(20); // Get up to 20 meals
+        
+        if (result && result.meals && Array.isArray(result.meals)) {
+          console.log('✅ Meals loaded from API:', result.meals.length, 'meals');
+          setMeals(result.meals);
+        } else {
+          console.log('📝 Invalid meal data structure from API, using mock data. Result:', result);
+          setMeals(mockMeals);
+        }
+      } catch (error) {
+        console.error('❌ Error loading meals:', error);
+        console.log('📝 Falling back to mock meals');
+        setMeals(mockMeals);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMeals();
   }, []);
 
   const formatDate = (dateString: string) => {

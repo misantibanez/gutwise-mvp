@@ -3,7 +3,9 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Textarea } from "./ui/textarea";
-import { Clock, AlertCircle, CheckCircle, Zap, Heart, Brain, Activity } from "lucide-react";
+import { Clock, AlertCircle, CheckCircle, Zap, Heart, Brain, Activity, Trophy } from "lucide-react";
+import { gamificationService } from "../utils/gamification-service";
+import { toast } from "sonner@2.0.3";
 
 interface SymptomTrackerProps {
   meal?: any;
@@ -184,6 +186,35 @@ export function SymptomTracker({
     // Simple mock save - no API calls
     setTimeout(() => {
       console.log("Symptoms saved successfully");
+      
+      // Update gamification stats
+      const { newAchievements, levelUp } = gamificationService.trackSymptom();
+      
+      // Show achievement notifications
+      if (levelUp) {
+        const stats = gamificationService.getStats();
+        toast.success(`Level Up! You're now Level ${stats.level}! 🎉`, {
+          icon: '🏆',
+          duration: 3000
+        });
+      }
+      
+      newAchievements.forEach(achievement => {
+        toast.success(`Achievement Unlocked: ${achievement.name}!`, {
+          icon: achievement.isRare ? '🌟' : '🏆',
+          description: achievement.description,
+          duration: 4000
+        });
+      });
+      
+      if (newAchievements.length === 0 && !levelUp) {
+        const stats = gamificationService.getStats();
+        toast.success(`Symptoms tracked! +15 XP (${stats.experiencePoints} total)`, {
+          icon: '📊',
+          duration: 2000
+        });
+      }
+      
       onNavigate("feedback-success");
       setIsSubmitting(false);
     }, 1500);

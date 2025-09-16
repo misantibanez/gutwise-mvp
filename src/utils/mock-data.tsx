@@ -442,3 +442,98 @@ export const mockAPI = {
     return { location: mockUserLocation, success: true };
   }
 };
+
+// Mock data service to match the expected API interface
+export const mockDataService = {
+  // User Profile
+  getUserProfile: () => ({
+    profile: {
+      id: 'demo-user-001',
+      email: 'demo@gutwise.app',
+      name: 'Demo User',
+      dietary_restrictions: ['gluten-free', 'dairy-sensitive'],
+      health_conditions: ['IBS', 'Food Sensitivities'],
+      trigger_foods: ['spicy foods', 'high-fat foods', 'beans'],
+      safe_cuisines: ['Mediterranean', 'Japanese', 'Healthy'],
+      notification_preferences: {
+        check_in_enabled: true,
+        symptom_reminders: true
+      },
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: new Date().toISOString()
+    }
+  }),
+
+  // Recent Meals
+  getRecentMeals: (limit?: number) => ({
+    meals: (limit ? mockMeals.slice(0, limit) : mockMeals).map(meal => ({
+      id: meal.id,
+      user_id: 'demo-user-001',
+      dish_name: meal.dish_name,
+      restaurant_name: meal.restaurant_name,
+      meal_time: meal.meal_time,
+      cuisine_type: meal.tags?.[0] || 'unknown',
+      meal_type: 'lunch',
+      portion_size: 'regular',
+      analysis: {
+        safety_status: meal.id === 'meal-008' ? 'risky' : 'safe',
+        confidence_score: meal.id === 'meal-008' ? 65 : 92,
+        ai_analysis: meal.id === 'meal-008' ? 
+          'This meal contains high-fat ingredients that may trigger symptoms.' :
+          'This meal appears safe based on your dietary profile.',
+        potential_triggers: meal.id === 'meal-008' ? ['high-fat', 'processed-meat'] : [],
+        safe_ingredients: meal.tags || []
+      },
+      notes: meal.notes,
+      created_at: meal.meal_time,
+      updated_at: meal.meal_time
+    }))
+  }),
+
+  // Symptom History
+  getSymptomHistory: () => ({
+    symptoms: mockSymptoms.map(symptom => ({
+      id: symptom.id,
+      user_id: 'demo-user-001',
+      meal_id: symptom.meal_id,
+      symptoms: symptom.symptoms || [],
+      severity: symptom.severity_scores || {},
+      overall_severity: symptom.overall_feeling === 'great' ? 1 : 
+                       symptom.overall_feeling === 'good' ? 2 :
+                       symptom.overall_feeling === 'okay' ? 3 : 4,
+      mood_impact: symptom.overall_feeling === 'great' ? 1 : 
+                   symptom.overall_feeling === 'good' ? 2 :
+                   symptom.overall_feeling === 'okay' ? 3 : 4,
+      onset_time: symptom.recorded_at,
+      notes: symptom.notes,
+      created_at: symptom.recorded_at,
+      updated_at: symptom.recorded_at
+    }))
+  }),
+
+  // Dashboard Insights
+  getDashboardInsights: () => ({
+    insights: {
+      trigger_patterns: {
+        'high-fat': { frequency: 3, avg_severity: 3.5 },
+        'spicy': { frequency: 2, avg_severity: 2.5 },
+        'dairy': { frequency: 1, avg_severity: 2.0 }
+      },
+      safe_foods: [
+        'quinoa', 'chicken breast', 'olive oil', 'spinach', 'sweet potato',
+        'cucumber', 'tomato', 'lemon', 'herbs', 'rice'
+      ],
+      best_restaurants: [
+        'Fresh Garden Bistro', 'Mediterranean Delights', 'La Nonna Ristorante'
+      ],
+      cuisine_safety: {
+        'Mediterranean': 0.95,
+        'Healthy': 0.98,
+        'Italian': 0.88,
+        'Thai': 0.75,
+        'Mexican': 0.82,
+        'American': 0.65
+      }
+    }
+  })
+};

@@ -31,6 +31,7 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack, onSignIn }: Auth
       // Fallback mock authentication for development
       setTimeout(() => {
         const mockUser = {
+          id: 'user_12345',
           name: name.trim() || email.split('@')[0] || 'Demo User',
           email: email || 'demo@gutwise.com'
         };
@@ -52,6 +53,7 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack, onSignIn }: Auth
       // Fallback mock Azure auth for development
       setTimeout(() => {
         const mockUser = {
+          id: 'user_12345',
           name: 'Demo User (Azure)',
           email: 'demo@company.com'
         };
@@ -69,6 +71,7 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack, onSignIn }: Auth
     // Simple mock OAuth for development/demo
     setTimeout(() => {
       const mockUser = {
+        id: 'user_12345',
         name: `Demo User (${provider})`,
         email: `demo@${provider}.com`
       };
@@ -126,31 +129,20 @@ export function AuthScreen({ onNavigate, onAuthSuccess, onBack, onSignIn }: Auth
             </div>
           </div>
           
-          <div className="space-y-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOAuthSignIn('google')}
-              className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700"
-              disabled={isLoading}
-            >
-              Continue with Google
-            </Button>
-            
-            {/* Skip Demo Button */}
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onAuthSuccess({
-                name: 'Demo User',
-                email: 'demo@gutwise.com'
-              })}
-              className="w-full text-gray-400 hover:text-white hover:bg-gray-700"
-              disabled={isLoading}
-            >
-              Skip - Try Demo
-            </Button>
-          </div>
+          {/* Skip Demo Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onAuthSuccess({
+              id: 'user_12345',
+              name: 'Demo User',
+              email: 'demo@gutwise.com'
+            })}
+            className="w-full text-gray-400 hover:text-white hover:bg-gray-700"
+            disabled={isLoading}
+          >
+            Skip - Try Demo
+          </Button>
         </div>
       </Card>
 

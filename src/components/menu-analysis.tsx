@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { CheckCircle, AlertTriangle, XCircle, Info, MapPin, Clock, Star, Loader2 } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Info, MapPin, Clock, Star, Loader2, Navigation } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { menuAnalysisService, AnalyzedMenuItem } from "../utils/menu-analysis-service";
 
@@ -44,22 +44,34 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
     features: restaurant?.features || defaultRestaurant.features
   };
 
-  // Load and analyze menu items
+  // Load and analyze menu items using real generate-menu API
   useEffect(() => {
     const loadMenu = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Generate mock menu items for this restaurant
-        const mockItems = menuAnalysisService.generateMockMenuItems(restaurantData.name);
-        
-        // Analyze all items using the Azure Function API
-        const analyzedItems = await menuAnalysisService.analyzeMultipleItems(
-          mockItems, 
-          { name: restaurantData.name }
-        );
+        console.log(`🔄 Loading real menu data for ${restaurantData.name}...`);
 
+        // Get user's actual health conditions and dietary restrictions
+        const getUserProfile = () => {
+          try {
+            const healthConditions = JSON.parse(localStorage.getItem('gutwise-health-conditions') || '["IBS", "Lactose Intolerance"]');
+            const dietaryRestrictions = JSON.parse(localStorage.getItem('gutwise-dietary-restrictions') || '["Gluten-free", "Low FODMAP"]');
+            return { healthConditions, dietaryRestrictions };
+          } catch {
+            return { healthConditions: ['IBS', 'Lactose Intolerance'], dietaryRestrictions: ['Gluten-free', 'Low FODMAP'] };
+          }
+        };
+
+        // Always use the real generate-menu API for actual restaurant dishes
+        const analyzedItems = await menuAnalysisService.generateMenuForAnalysis({
+          name: restaurantData.name,
+          cuisine: restaurantData.cuisine,
+          location: restaurantData.address || 'New York, NY'
+        }, getUserProfile()); // Use dedicated method for menu analysis
+
+        console.log(`✅ Real menu loaded for ${restaurantData.name}:`, analyzedItems.length, 'items');
         setMenuItems(analyzedItems);
 
         // Calculate and update dynamic counts based on actual analysis
@@ -80,7 +92,7 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
     };
 
     loadMenu();
-  }, [restaurantData.name]);
+  }, [restaurantData.name, restaurantData.cuisine, restaurantData.address]); // Include more fields to ensure fresh loads
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -106,14 +118,29 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
     setError(null);
     setLoading(true);
     
-    // Re-run the analysis
+    // Re-run the analysis with real API
     const loadMenu = async () => {
       try {
-        const mockItems = menuAnalysisService.generateMockMenuItems(restaurantData.name);
-        const analyzedItems = await menuAnalysisService.analyzeMultipleItems(
-          mockItems, 
-          { name: restaurantData.name }
-        );
+        console.log(`🔄 Retrying real menu analysis for ${restaurantData.name}...`);
+        
+        // Get user's actual health conditions and dietary restrictions for retry
+        const getUserProfile = () => {
+          try {
+            const healthConditions = JSON.parse(localStorage.getItem('gutwise-health-conditions') || '["IBS", "Lactose Intolerance"]');
+            const dietaryRestrictions = JSON.parse(localStorage.getItem('gutwise-dietary-restrictions') || '["Gluten-free", "Low FODMAP"]');
+            return { healthConditions, dietaryRestrictions };
+          } catch {
+            return { healthConditions: ['IBS', 'Lactose Intolerance'], dietaryRestrictions: ['Gluten-free', 'Low FODMAP'] };
+          }
+        };
+        
+        const analyzedItems = await menuAnalysisService.generateMenuForAnalysis({
+          name: restaurantData.name,
+          cuisine: restaurantData.cuisine,
+          location: restaurantData.address || 'New York, NY'
+        }, getUserProfile()); // Use dedicated method for menu analysis retry
+        
+        console.log(`✅ Retry successful for ${restaurantData.name}:`, analyzedItems.length, 'items');
         setMenuItems(analyzedItems);
         
         // Update counts for retry as well
@@ -135,6 +162,13 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
     loadMenu();
   };
 
+  // Function to open Google Maps with directions
+  const openDirections = () => {
+    const destination = encodeURIComponent(`${restaurantData.name}, ${restaurantData.address}`);
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+    window.open(googleMapsUrl, '_blank');
+  };
+
   return (
     <div className="space-y-4" data-frame="[screen:MenuAnalysis]">
       {/* Header */}
@@ -147,7 +181,14 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
           ← Back
         </Button>
         <h2 className="text-white">Menu Analysis</h2>
-        <div></div>
+        <Button
+          variant="ghost"
+          onClick={openDirections}
+          className="text-gray-300 hover:text-white hover:bg-gray-800"
+          title="Get Directions"
+        >
+          <Navigation className="w-4 h-4" />
+        </Button>
       </div>
 
       {/* Enhanced Restaurant Info */}
@@ -192,12 +233,23 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
             </div>
           </div>
 
-          {/* Location & Hours */}
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-300">{restaurantData.address}</span>
-              <span className="text-sm text-blue-400">• {restaurantData.distance}</span>
+          {/* Location & Hours with Directions */}
+          <div className="space-y-3 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 flex-1">
+                <MapPin className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-300">{restaurantData.address}</span>
+                <span className="text-sm text-blue-400">• {restaurantData.distance}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={openDirections}
+                className="text-blue-400 hover:text-white hover:bg-blue-600 px-3 py-1 h-auto text-xs"
+              >
+                <Navigation className="w-3 h-3 mr-1" />
+                Directions
+              </Button>
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4 text-gray-400" />
@@ -208,16 +260,7 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
             </div>
           </div>
 
-          {/* Features */}
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2">
-              {restaurantData.features.map((feature, index) => (
-                <Badge key={index} variant="outline" className="text-xs border-purple-400 text-purple-300">
-                  {feature}
-                </Badge>
-              ))}
-            </div>
-          </div>
+
 
           {/* Safety Analysis */}
           <div className="bg-gray-900/50 rounded-lg p-3">
@@ -266,8 +309,8 @@ export function MenuAnalysis({ restaurant, onNavigate, onBack }: MenuAnalysisPro
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-3" />
-              <p className="text-blue-400 font-medium">Analyzing menu with AI...</p>
-              <p className="text-sm text-gray-400 mt-1">This may take a few moments</p>
+              <p className="text-blue-400 font-medium">Getting real menu from {restaurantData.name}...</p>
+              <p className="text-sm text-gray-400 mt-1">Using Azure AI to analyze actual dishes</p>
             </div>
           </div>
           {/* Loading skeletons */}

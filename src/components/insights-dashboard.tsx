@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { TrendingUp, TrendingDown, Calendar, Award, AlertTriangle, BarChart3, Activity, Zap, Loader2 } from "lucide-react";
+import { GamificationDisplay } from "./gamification-display";
 
 interface InsightsDashboardProps {
   onBack: () => void;
@@ -28,7 +29,7 @@ interface MealEntry {
 }
 
 export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps) {
-  // Simple mock data - no API calls
+  // Mock data for Level 5 user with more extensive history
   const mockSymptoms: SymptomEntry[] = [
     {
       id: 'symptom-001',
@@ -40,7 +41,7 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
     },
     {
       id: 'symptom-002',
-      overall_feeling: 'good',
+      overall_feeling: 'excellent',
       symptoms: [],
       severity_scores: {},
       recorded_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -48,9 +49,9 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
     },
     {
       id: 'symptom-003',
-      overall_feeling: 'okay',
-      symptoms: ['mild bloating'],
-      severity_scores: { 'bloating': 2 },
+      overall_feeling: 'good',
+      symptoms: [],
+      severity_scores: {},
       recorded_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-003'
     },
@@ -72,35 +73,97 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
     },
     {
       id: 'symptom-006',
-      overall_feeling: 'not-good',
-      symptoms: ['bloating', 'fatigue'],
-      severity_scores: { 'bloating': 4, 'fatigue': 3 },
-      recorded_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      overall_feeling: 'okay',
+      symptoms: ['mild bloating'],
+      severity_scores: { 'bloating': 2 },
+      recorded_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-006'
+    },
+    {
+      id: 'symptom-007',
+      overall_feeling: 'great',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-007'
+    },
+    {
+      id: 'symptom-008',
+      overall_feeling: 'excellent',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-008'
+    },
+    {
+      id: 'symptom-009',
+      overall_feeling: 'good',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-009'
+    },
+    {
+      id: 'symptom-010',
+      overall_feeling: 'not-good',
+      symptoms: ['bloating', 'stomach pain'],
+      severity_scores: { 'bloating': 3, 'stomach pain': 3 },
+      recorded_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-010'
+    },
+    {
+      id: 'symptom-011',
+      overall_feeling: 'great',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-011'
+    },
+    {
+      id: 'symptom-012',
+      overall_feeling: 'excellent',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-012'
     }
   ];
 
   const mockMeals: MealEntry[] = [
     {
       id: 'meal-001',
-      dish_name: 'Margherita Pizza',
-      restaurant_name: 'La Nonna Ristorante',
+      dish_name: 'Grilled Salmon Bowl',
+      restaurant_name: 'Mediterranean Garden',
       meal_time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      tags: ['italian', 'pizza', 'vegetarian']
+      tags: ['mediterranean', 'salmon', 'healthy', 'gluten-free']
     },
     {
       id: 'meal-002',
-      dish_name: 'Chicken Caesar Salad',
-      restaurant_name: 'Fresh Garden Bistro',
+      dish_name: 'Quinoa Buddha Bowl',
+      restaurant_name: 'Green Leaf Cafe',
       meal_time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      tags: ['salad', 'chicken', 'healthy']
+      tags: ['healthy', 'quinoa', 'vegetarian', 'low-fodmap']
     },
     {
       id: 'meal-003',
-      dish_name: 'Pad Thai',
-      restaurant_name: 'Bangkok Kitchen',
+      dish_name: 'Chicken Tikka (No Onions)',
+      restaurant_name: 'Spice Route',
       meal_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      tags: ['thai', 'noodles', 'spicy']
+      tags: ['indian', 'chicken', 'customized']
+    },
+    {
+      id: 'meal-004',
+      dish_name: 'Greek Salad with Grilled Chicken',
+      restaurant_name: 'Athens Corner',
+      meal_time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['greek', 'salad', 'chicken', 'dairy-free']
+    },
+    {
+      id: 'meal-005',
+      dish_name: 'Sushi Bowl (No Spicy Mayo)',
+      restaurant_name: 'Zen Sushi',
+      meal_time: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['japanese', 'sushi', 'customized', 'low-fat']
     }
   ];
 
@@ -405,6 +468,9 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
         <h2 className="text-white">Your Insights</h2>
         <div></div>
       </div>
+
+      {/* Gamification Display */}
+      <GamificationDisplay variant="full" showDoctorShare={true} />
 
       {/* Overview Stats */}
       <div className="grid grid-cols-3 gap-3">

@@ -217,37 +217,35 @@ class AzureMapsService {
   }
 
   private generateRestaurantImage(cuisine: string): string {
-    // Map cuisine types to appropriate Unsplash search terms
-    const imageQueries: Record<string, string> = {
-      italian: 'italian restaurant food',
-      american: 'american restaurant burger',
-      asian: 'asian restaurant food',
-      mexican: 'mexican restaurant tacos',
-      mediterranean: 'mediterranean restaurant food',
-      chinese: 'chinese restaurant food',
-      japanese: 'japanese restaurant sushi',
-      indian: 'indian restaurant curry',
-      french: 'french restaurant food',
-      thai: 'thai restaurant food',
-      vietnamese: 'vietnamese restaurant pho',
-      korean: 'korean restaurant food',
-      seafood: 'seafood restaurant fish',
-      steakhouse: 'steakhouse restaurant steak',
-      pizza: 'pizza restaurant',
-      cafe: 'cafe coffee restaurant',
-      bakery: 'bakery restaurant',
-      fast_food: 'fast food restaurant',
+    // Map cuisine types to actual working Unsplash images
+    const cuisineImages: Record<string, string> = {
+      italian: 'https://images.unsplash.com/photo-1715607873797-a173a95fd47c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NTI5OTQwfDA&ixlib=rb-4.1.0&q=80&w=400',
+      american: 'https://images.unsplash.com/photo-1572294888157-e750af07dbd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbWVyaWNhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYzMDk3Mnww&ixlib=rb-4.1.0&q=80&w=400',
+      asian: 'https://images.unsplash.com/photo-1741612552052-2c5806e8a9ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYyMjQ0MHww&ixlib=rb-4.1.0&q=80&w=400',
+      mexican: 'https://images.unsplash.com/photo-1611942766601-12d3aedc6c2f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZXhpY2FuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NTQ0MTE3fDA&ixlib=rb-4.1.0&q=80&w=400',
+      mediterranean: 'https://images.unsplash.com/photo-1705648341120-666923f8b675?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpdGVycmFuZWFuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NjMwOTgxfDA&ixlib=rb-4.1.0&q=80&w=400',
+      chinese: 'https://images.unsplash.com/photo-1556151241-ac08ea44afd6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaGluZXNlJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NjMwOTg4fDA&ixlib=rb-4.1.0&q=80&w=400',
+      japanese: 'https://images.unsplash.com/photo-1717988732486-285ea23a6f88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxqYXBhbmVzZSUyMHJlc3RhdXJhbnQlMjBzdXNoaXxlbnwxfHx8fDE3NTc2MzA5ODR8MA&ixlib=rb-4.1.0&q=80&w=400',
+      indian: 'https://images.unsplash.com/photo-1690915475414-9aaecfd3ba74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjByZXN0YXVyYW50JTIwY3Vycnl8ZW58MXx8fHwxNzU3NjMwOTk0fDA&ixlib=rb-4.1.0&q=80&w=400',
+      thai: 'https://images.unsplash.com/photo-1665199020996-66cfdf8cba00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0aGFpJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NjMwOTkxfDA&ixlib=rb-4.1.0&q=80&w=400',
+      french: 'https://images.unsplash.com/photo-1715607873797-a173a95fd47c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NTI5OTQwfDA&ixlib=rb-4.1.0&q=80&w=400',
+      vietnamese: 'https://images.unsplash.com/photo-1741612552052-2c5806e8a9ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYyMjQ0MHww&ixlib=rb-4.1.0&q=80&w=400',
+      korean: 'https://images.unsplash.com/photo-1741612552052-2c5806e8a9ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYyMjQ0MHww&ixlib=rb-4.1.0&q=80&w=400',
+      seafood: 'https://images.unsplash.com/photo-1705648341120-666923f8b675?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpdGVycmFuZWFuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NjMwOTgxfDA&ixlib=rb-4.1.0&q=80&w=400',
+      steakhouse: 'https://images.unsplash.com/photo-1572294888157-e750af07dbd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbWVyaWNhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYzMDk3Mnww&ixlib=rb-4.1.0&q=80&w=400',
+      pizza: 'https://images.unsplash.com/photo-1715607873797-a173a95fd47c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NTI5OTQwfDA&ixlib=rb-4.1.0&q=80&w=400',
+      cafe: 'https://images.unsplash.com/photo-1667388968964-4aa652df0a9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMGRpbmluZ3xlbnwxfHx8fDE3NTc1ODE5MTN8MA&ixlib=rb-4.1.0&q=80&w=400',
+      bakery: 'https://images.unsplash.com/photo-1667388968964-4aa652df0a9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMGRpbmluZ3xlbnwxfHx8fDE3NTc1ODE5MTN8MA&ixlib=rb-4.1.0&q=80&w=400',
+      fast_food: 'https://images.unsplash.com/photo-1572294888157-e750af07dbd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbWVyaWNhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYzMDk3Mnww&ixlib=rb-4.1.0&q=80&w=400',
+      bbq: 'https://images.unsplash.com/photo-1572294888157-e750af07dbd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbWVyaWNhbiUyMHJlc3RhdXJhbnQlMjBmb29kfGVufDF8fHx8MTc1NzYzMDk3Mnww&ixlib=rb-4.1.0&q=80&w=400',
+      sushi: 'https://images.unsplash.com/photo-1717988732486-285ea23a6f88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxqYXBhbmVzZSUyMHJlc3RhdXJhbnQlMjBzdXNoaXxlbnwxfHx8fDE3NTc2MzA5ODR8MA&ixlib=rb-4.1.0&q=80&w=400',
     };
 
-    const query = imageQueries[cuisine.toLowerCase()] || 'restaurant food dining';
-    
-    // Generate a consistent image URL based on the cuisine
-    const imageId = Math.abs(cuisine.split('').reduce((hash, char) => {
-      hash = ((hash << 5) - hash) + char.charCodeAt(0);
-      return hash & hash; // Convert to 32-bit integer
-    }, 0)) % 1000;
+    // Default fallback image for unmatched cuisines
+    const defaultImage = 'https://images.unsplash.com/photo-1667388968964-4aa652df0a9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMGRpbmluZ3xlbnwxfHx8fDE3NTc1ODE5MTN8MA&ixlib=rb-4.1.0&q=80&w=400';
 
-    return `https://images.unsplash.com/photo-${1500000000 + imageId}?w=400&h=300&fit=crop&crop=entropy&auto=format&q=80`;
+    // Return the matching image or default
+    return cuisineImages[cuisine.toLowerCase()] || defaultImage;
   }
 
   private formatDistance(distanceInMeters: number): string {
@@ -464,7 +462,7 @@ class AzureMapsService {
         rating: 4.5,
         safeOptions: 3,
         riskOptions: 2,
-        image: 'https://images.unsplash.com/photo-1609951734391-b79a50460c6c?w=400&h=300&fit=crop&crop=entropy&auto=format&q=80',
+        image: 'https://images.unsplash.com/photo-1715607873797-a173a95fd47c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwcmVzdGF1cmFudCUyMGZvb2R8ZW58MXx8fHwxNzU3NTI5OTQwfDA&ixlib=rb-4.1.0&q=80&w=400',
         dishes: [
           { name: 'Grilled Salmon', status: 'safe', confidence: 95 },
           { name: 'Caesar Salad (no croutons)', status: 'safe', confidence: 89 },
@@ -482,7 +480,7 @@ class AzureMapsService {
         rating: 4.8,
         safeOptions: 5,
         riskOptions: 0,
-        image: 'https://images.unsplash.com/photo-1642339800099-921df1a0a958?w=400&h=300&fit=crop&crop=entropy&auto=format&q=80',
+        image: 'https://images.unsplash.com/photo-1667388968964-4aa652df0a9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMGRpbmluZ3xlbnwxfHx8fDE3NTc1ODE5MTN8MA&ixlib=rb-4.1.0&q=80&w=400',
         dishes: [
           { name: 'Mediterranean Quinoa Bowl', status: 'safe', confidence: 98 },
           { name: 'Grilled Chicken Salad', status: 'safe', confidence: 95 },
@@ -500,7 +498,7 @@ class AzureMapsService {
         rating: 4.6,
         safeOptions: 4,
         riskOptions: 1,
-        image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop&crop=entropy&auto=format&q=80',
+        image: 'https://images.unsplash.com/photo-1717988732486-285ea23a6f88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxqYXBhbmVzZSUyMHJlc3RhdXJhbnQlMjBzdXNoaXxlbnwxfHx8fDE3NTc2MzA5ODR8MA&ixlib=rb-4.1.0&q=80&w=400',
         dishes: [
           { name: 'Salmon Teriyaki', status: 'safe', confidence: 92 },
           { name: 'Miso Soup', status: 'safe', confidence: 88 },

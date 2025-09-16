@@ -69,11 +69,16 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white py-3 rounded-xl transition-all duration-200"
         >
           Get Started
-        </Button>        
+        </Button>
+        
+
+        
         <p className="text-center text-xs text-gray-500 leading-relaxed">
           Start your journey to better digestive health with personalized food guidance
         </p>
       </div>
+
+
     </div>
   );
 }
