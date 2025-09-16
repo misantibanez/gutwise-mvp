@@ -2,7 +2,7 @@ import { geolocationService, Location } from './location/geolocation';
 import { requestLocationWithTimeout, getLocationErrorMessage } from './location-utils';
 
 // Azure Maps API configuration
-const AZURE_MAPS_API_KEY = '7bXKrLSJ72bDOolGh8KySekLi1Xq2FADXMfruUpBjQiTwrsfpTQjJQQJ99BIACYeBjFgverEAAAgAZMP2Rw6';
+const AZURE_MAPS_API_KEY = '';
 const AZURE_MAPS_BASE_URL = 'https://atlas.microsoft.com/search/poi/category/json';
 
 // Interface for Azure Maps API response
