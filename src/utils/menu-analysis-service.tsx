@@ -50,7 +50,7 @@ export interface AnalyzedMenuItem {
 }
 
 class MenuAnalysisService {
-  private readonly apiUrl = 'https://func-generate-menu.azurewebsites.net/api/generate-menu?code=QnfqZy8BdvKCO8b03BaNRmfBjzdHJdM5a2Voall-nbcfAzFusYE7gw==';
+  private readonly apiUrl = 'https://func-generate-menu.azurewebsites.net/api/generate-menu?code=';
 
   // Default user profile for demo purposes
   private readonly defaultUserProfile: UserProfile = {
