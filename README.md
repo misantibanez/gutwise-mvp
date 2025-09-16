@@ -17,6 +17,8 @@ The app combines **meal tracking, AI-powered recommendations, and proactive push
 
 Our killer feature: **location-aware restaurant guidance**. GutWise detects where you are, shows safe / risky / avoid dishes based on your history, and checks in later to log symptoms—all with minimal friction.
 
+Additional features:
+- https://github.com/misantibanez/gutwise-generate-menu/tree/main
 ---
 
 ## 🎯 Goals for MVP
