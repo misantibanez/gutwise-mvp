@@ -5,7 +5,7 @@ import { mockDataService } from '../mock-data';
 
 // Helper to get current user session (demo mode only)
 export async function getCurrentUser() {
-  try {    // Check if we're in test mode with a real Azure user
+  try {   // Check if we're in test mode with a real Azure user
     const testConfig = localStorage.getItem('gutwise-test-config');
     if (testConfig) {
       const config = JSON.parse(testConfig);

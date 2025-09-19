@@ -60,10 +60,41 @@ export function GamificationDisplay({ variant = 'full', showDoctorShare = true }
 
   const handleCopyReport = async () => {
     try {
-      await navigator.clipboard.writeText(doctorReport);
-      toast.success('Report copied to clipboard');
+      // Check if clipboard API is available
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(doctorReport);
+        toast.success('✅ Report copied to clipboard!', {
+          description: 'You can now paste it into your email or document'
+        });
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = doctorReport;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          toast.success('✅ Report copied to clipboard!', {
+            description: 'You can now paste it into your email or document'
+          });
+        } catch (err) {
+          toast.error('❌ Failed to copy report', {
+            description: 'Please manually select and copy the text above'
+          });
+        } finally {
+          textArea.remove();
+        }
+      }
     } catch (error) {
-      toast.error('Failed to copy report');
+      console.error('Copy failed:', error);
+      toast.error('❌ Failed to copy report', {
+        description: 'Please manually select and copy the text above'
+      });
     }
   };
 
@@ -407,39 +438,50 @@ export function GamificationDisplay({ variant = 'full', showDoctorShare = true }
 
       {/* Doctor Report Dialog */}
       <Dialog open={showDoctorReport} onOpenChange={setShowDoctorReport}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-4xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center space-x-2">
               <Share2 className="w-5 h-5 text-blue-400" />
-              <span>Progress Report for Healthcare Provider</span>
+              <span>Digestive Health Report for Healthcare Provider</span>
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              value={doctorReport}
-              readOnly
-              className="bg-gray-700 border-gray-600 text-white min-h-96 font-mono text-sm"
-            />
-            <div className="flex space-x-2">
-              <Button
-                onClick={handleCopyReport}
-                variant="outline"
-                className="flex-1 border-gray-600 text-gray-300 hover:text-white hover:bg-gray-700"
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                Copy Report
-              </Button>
-              <Button
-                onClick={handleShareReport}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Report
-              </Button>
+          
+          <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+            {/* Report Content */}
+            <div className="flex-1 overflow-y-auto border border-gray-600 rounded-lg">
+              <Textarea
+                value={doctorReport}
+                readOnly
+                className="bg-gray-700 border-0 text-white h-full min-h-[400px] font-mono text-sm resize-none focus:ring-0 focus:outline-none"
+                placeholder="Generating report..."
+              />
             </div>
-            <p className="text-xs text-gray-400">
-              This report contains your activity summary and can be shared with your healthcare provider to discuss your progress.
-            </p>
+            
+            {/* Action Buttons */}
+            <div className="flex-shrink-0 space-y-3">
+              {/* Primary Actions */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={handleCopyReport}
+                  variant="outline"
+                  className="border-blue-500 text-blue-400 hover:text-white hover:bg-blue-600 hover:border-blue-600 transition-colors"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy to Clipboard
+                </Button>
+                <Button
+                  onClick={handleShareReport}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Report
+                </Button>
+              </div>
+              
+              <p className="text-xs text-gray-400 text-center">
+                📄 This comprehensive health report includes your food patterns, symptom analysis, and clinical insights for your healthcare provider.
+              </p>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

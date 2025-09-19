@@ -29,8 +29,9 @@ interface MealEntry {
 }
 
 export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps) {
-  // Mock data for Level 5 user with more extensive history
+  // Mock data for Level 5 user with more extensive history and realistic food-symptom patterns
   const mockSymptoms: SymptomEntry[] = [
+    // Recent meals - mostly positive
     {
       id: 'symptom-001',
       overall_feeling: 'great',
@@ -71,46 +72,58 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       recorded_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-005'
     },
+    
+    // Spicy Thai Curry - caused bloating
     {
       id: 'symptom-006',
-      overall_feeling: 'okay',
-      symptoms: ['mild bloating'],
-      severity_scores: { 'bloating': 2 },
+      overall_feeling: 'not-good',
+      symptoms: ['bloating', 'stomach discomfort'],
+      severity_scores: { 'bloating': 3, 'stomach discomfort': 2 },
       recorded_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-006'
     },
+    
+    // Caesar Salad - mild symptoms (dairy intolerance)
     {
       id: 'symptom-007',
-      overall_feeling: 'great',
-      symptoms: [],
-      severity_scores: {},
+      overall_feeling: 'okay',
+      symptoms: ['mild bloating'],
+      severity_scores: { 'bloating': 2 },
       recorded_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-007'
     },
+    
+    // Margherita Pizza - gluten sensitivity
     {
       id: 'symptom-008',
-      overall_feeling: 'excellent',
-      symptoms: [],
-      severity_scores: {},
+      overall_feeling: 'not-good',
+      symptoms: ['bloating', 'fatigue'],
+      severity_scores: { 'bloating': 3, 'fatigue': 2 },
       recorded_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-008'
     },
+    
+    // Beef Burrito Bowl - beans caused gas
     {
       id: 'symptom-009',
-      overall_feeling: 'good',
-      symptoms: [],
-      severity_scores: {},
+      overall_feeling: 'okay',
+      symptoms: ['gas', 'mild cramping'],
+      severity_scores: { 'gas': 2, 'cramping': 1 },
       recorded_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-009'
     },
+    
+    // Pad Thai - peanut sensitivity
     {
       id: 'symptom-010',
       overall_feeling: 'not-good',
-      symptoms: ['bloating', 'stomach pain'],
-      severity_scores: { 'bloating': 3, 'stomach pain': 3 },
+      symptoms: ['stomach pain', 'nausea'],
+      severity_scores: { 'stomach pain': 3, 'nausea': 2 },
       recorded_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-010'
     },
+    
+    // Grilled Chicken Salad - safe food
     {
       id: 'symptom-011',
       overall_feeling: 'great',
@@ -119,13 +132,45 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       recorded_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-011'
     },
+    
+    // Mushroom Risotto - rich and creamy caused discomfort
     {
       id: 'symptom-012',
-      overall_feeling: 'excellent',
-      symptoms: [],
-      severity_scores: {},
+      overall_feeling: 'okay',
+      symptoms: ['heaviness', 'mild nausea'],
+      severity_scores: { 'heaviness': 2, 'nausea': 1 },
       recorded_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
       meal_id: 'meal-012'
+    },
+    
+    // Fish and Chips - fried food intolerance
+    {
+      id: 'symptom-013',
+      overall_feeling: 'not-good',
+      symptoms: ['stomach pain', 'bloating', 'nausea'],
+      severity_scores: { 'stomach pain': 4, 'bloating': 3, 'nausea': 3 },
+      recorded_at: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-013'
+    },
+    
+    // Vegetable Stir Fry - good choice
+    {
+      id: 'symptom-014',
+      overall_feeling: 'good',
+      symptoms: [],
+      severity_scores: {},
+      recorded_at: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-014'
+    },
+    
+    // BBQ Pulled Pork - heavy sauce caused acid reflux
+    {
+      id: 'symptom-015',
+      overall_feeling: 'okay',
+      symptoms: ['acid reflux', 'heartburn'],
+      severity_scores: { 'acid reflux': 2, 'heartburn': 2 },
+      recorded_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      meal_id: 'meal-015'
     }
   ];
 
@@ -164,6 +209,76 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       restaurant_name: 'Zen Sushi',
       meal_time: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
       tags: ['japanese', 'sushi', 'customized', 'low-fat']
+    },
+    {
+      id: 'meal-006',
+      dish_name: 'Spicy Thai Curry',
+      restaurant_name: 'Bangkok Bistro',
+      meal_time: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['thai', 'curry', 'spicy', 'coconut']
+    },
+    {
+      id: 'meal-007',
+      dish_name: 'Caesar Salad',
+      restaurant_name: 'Olive Garden',
+      meal_time: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['salad', 'caesar', 'dairy', 'gluten']
+    },
+    {
+      id: 'meal-008',
+      dish_name: 'Margherita Pizza',
+      restaurant_name: 'Tony\'s Pizzeria',
+      meal_time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['pizza', 'cheese', 'tomato', 'gluten']
+    },
+    {
+      id: 'meal-009',
+      dish_name: 'Beef Burrito Bowl',
+      restaurant_name: 'Chipotle',
+      meal_time: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['mexican', 'beef', 'beans', 'spicy']
+    },
+    {
+      id: 'meal-010',
+      dish_name: 'Pad Thai with Shrimp',
+      restaurant_name: 'Thai Express',
+      meal_time: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['thai', 'noodles', 'shrimp', 'peanuts']
+    },
+    {
+      id: 'meal-011',
+      dish_name: 'Grilled Chicken Salad',
+      restaurant_name: 'Fresh & Fast',
+      meal_time: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['salad', 'chicken', 'healthy', 'low-carb']
+    },
+    {
+      id: 'meal-012',
+      dish_name: 'Mushroom Risotto',
+      restaurant_name: 'Italian Corner',
+      meal_time: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['italian', 'rice', 'mushroom', 'creamy']
+    },
+    {
+      id: 'meal-013',
+      dish_name: 'Fish and Chips',
+      restaurant_name: 'The Pub',
+      meal_time: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['fried', 'fish', 'potatoes', 'greasy']
+    },
+    {
+      id: 'meal-014',
+      dish_name: 'Vegetable Stir Fry',
+      restaurant_name: 'Wok Express',
+      meal_time: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['chinese', 'vegetables', 'healthy', 'garlic']
+    },
+    {
+      id: 'meal-015',
+      dish_name: 'BBQ Pulled Pork Sandwich',
+      restaurant_name: 'Smoky Joe\'s',
+      meal_time: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['bbq', 'pork', 'sauce', 'bread']
     }
   ];
 
@@ -179,7 +294,7 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
     return () => clearTimeout(timer);
   }, []);
 
-  // Calculate statistics from real data
+  // Calculate comprehensive statistics from real data
   const calculateStats = () => {
     if (symptoms.length === 0) {
       // Return fallback stats when no data
@@ -188,6 +303,7 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
         safeRatio: 0,
         topSymptoms: [],
         feelingDistribution: {
+          excellent: 0,
           great: 0,
           good: 0,
           okay: 0,
@@ -195,7 +311,10 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
           terrible: 0
         },
         recentTrend: 'stable' as 'improving' | 'stable' | 'concerning',
-        averageSeverity: 0
+        averageSeverity: 0,
+        safeFoods: [],
+        riskyFoods: [],
+        foodSymptomAssociations: []
       };
     }
 
@@ -208,20 +327,86 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       return acc;
     }, {} as Record<string, number>);
 
-    // Calculate safe ratio (great + good feelings)
-    const safeFeelings = (feelingDistribution.great || 0) + (feelingDistribution.good || 0);
+    // Calculate safe ratio (excellent + great + good feelings)
+    const safeFeelings = (feelingDistribution.excellent || 0) + (feelingDistribution.great || 0) + (feelingDistribution.good || 0);
     const safeRatio = totalEntries > 0 ? Math.round((safeFeelings / totalEntries) * 100) : 0;
 
-    // Calculate top symptoms
-    const symptomCounts: Record<string, { count: number; severities: number[] }> = {};
+    // Calculate food associations with symptoms and feelings
+    const foodAssociations: Record<string, {
+      positiveCount: number;
+      negativeCount: number;
+      symptoms: string[];
+      meals: MealEntry[];
+    }> = {};
+
+    symptoms.forEach(symptom => {
+      const meal = meals.find(m => m.id === symptom.meal_id);
+      if (meal) {
+        const isPositive = ['excellent', 'great', 'good'].includes(symptom.overall_feeling);
+        const isNegative = ['not-good', 'terrible'].includes(symptom.overall_feeling);
+        
+        if (!foodAssociations[meal.dish_name]) {
+          foodAssociations[meal.dish_name] = {
+            positiveCount: 0,
+            negativeCount: 0,
+            symptoms: [],
+            meals: []
+          };
+        }
+
+        if (isPositive) {
+          foodAssociations[meal.dish_name].positiveCount++;
+        } else if (isNegative) {
+          foodAssociations[meal.dish_name].negativeCount++;
+          if (symptom.symptoms) {
+            foodAssociations[meal.dish_name].symptoms.push(...symptom.symptoms);
+          }
+        }
+        foodAssociations[meal.dish_name].meals.push(meal);
+      }
+    });
+
+    // Get safe and risky foods
+    const safeFoods = Object.entries(foodAssociations)
+      .filter(([_, data]) => data.positiveCount > 0 && data.negativeCount === 0)
+      .map(([food, data]) => ({
+        name: food,
+        count: data.positiveCount,
+        restaurant: data.meals[0]?.restaurant_name
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    const riskyFoods = Object.entries(foodAssociations)
+      .filter(([_, data]) => data.negativeCount > 0)
+      .map(([food, data]) => ({
+        name: food,
+        negativeCount: data.negativeCount,
+        commonSymptoms: [...new Set(data.symptoms)].slice(0, 3),
+        restaurant: data.meals[0]?.restaurant_name
+      }))
+      .sort((a, b) => b.negativeCount - a.negativeCount)
+      .slice(0, 3);
+
+    // Calculate top symptoms with food associations
+    const symptomCounts: Record<string, { 
+      count: number; 
+      severities: number[]; 
+      associatedFoods: string[];
+    }> = {};
     
     symptoms.forEach(entry => {
+      const meal = meals.find(m => m.id === entry.meal_id);
       if (entry.symptoms && Array.isArray(entry.symptoms)) {
         entry.symptoms.forEach(symptom => {
           if (!symptomCounts[symptom]) {
-            symptomCounts[symptom] = { count: 0, severities: [] };
+            symptomCounts[symptom] = { count: 0, severities: [], associatedFoods: [] };
           }
           symptomCounts[symptom].count++;
+          
+          if (meal) {
+            symptomCounts[symptom].associatedFoods.push(meal.dish_name);
+          }
           
           // Add severity if available with validation
           if (entry.severity_scores && entry.severity_scores[symptom]) {
@@ -242,17 +427,28 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
         count: data.count,
         avgSeverity: data.severities.length > 0 
           ? Math.round((data.severities.reduce((a, b) => a + b, 0) / data.severities.length) * 10) / 10
-          : 0
+          : 0,
+        topFoods: [...new Set(data.associatedFoods)].slice(0, 3)
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 3);
+
+    // Food-symptom associations for detailed view
+    const foodSymptomAssociations = Object.entries(foodAssociations)
+      .filter(([_, data]) => data.symptoms.length > 0)
+      .map(([food, data]) => ({
+        food,
+        symptoms: [...new Set(data.symptoms)],
+        occurrences: data.negativeCount,
+        restaurant: data.meals[0]?.restaurant_name
+      }))
+      .sort((a, b) => b.occurrences - a.occurrences);
 
     // Calculate average severity
     const allSeverities: number[] = [];
     symptoms.forEach(entry => {
       if (entry.severity_scores) {
         Object.values(entry.severity_scores).forEach(severity => {
-          // Ensure we have a valid number and it's within expected range (1-5)
           const severityNum = typeof severity === 'number' ? severity : parseFloat(String(severity));
           if (!isNaN(severityNum) && severityNum >= 1 && severityNum <= 5) {
             allSeverities.push(severityNum);
@@ -264,19 +460,31 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       ? Math.round((allSeverities.reduce((a, b) => a + b, 0) / allSeverities.length) * 10) / 10
       : 0;
 
-    // Calculate recent trend (last 7 vs previous 7 entries)
+    // Calculate recent trend with more detail
     let recentTrend: 'improving' | 'stable' | 'concerning' = 'stable';
-    if (symptoms.length >= 14) {
+    let trendDetails = '';
+    
+    if (symptoms.length >= 7) {
       const recent = symptoms.slice(-7);
-      const previous = symptoms.slice(-14, -7);
-      
+      const recentGoodFeelings = recent.filter(s => ['excellent', 'great', 'good'].includes(s.overall_feeling)).length;
       const recentBadFeelings = recent.filter(s => ['not-good', 'terrible'].includes(s.overall_feeling)).length;
-      const previousBadFeelings = previous.filter(s => ['not-good', 'terrible'].includes(s.overall_feeling)).length;
       
-      if (recentBadFeelings < previousBadFeelings) {
-        recentTrend = 'improving';
-      } else if (recentBadFeelings > previousBadFeelings) {
-        recentTrend = 'concerning';
+      if (symptoms.length >= 14) {
+        const previous = symptoms.slice(-14, -7);
+        const previousGoodFeelings = previous.filter(s => ['excellent', 'great', 'good'].includes(s.overall_feeling)).length;
+        const previousBadFeelings = previous.filter(s => ['not-good', 'terrible'].includes(s.overall_feeling)).length;
+        
+        if (recentGoodFeelings > previousGoodFeelings && recentBadFeelings <= previousBadFeelings) {
+          recentTrend = 'improving';
+          trendDetails = `${recentGoodFeelings} good days this week vs ${previousGoodFeelings} last week`;
+        } else if (recentBadFeelings > previousBadFeelings) {
+          recentTrend = 'concerning';
+          trendDetails = `${recentBadFeelings} difficult days this week vs ${previousBadFeelings} last week`;
+        } else {
+          trendDetails = `Consistently ${recentGoodFeelings} good days per week`;
+        }
+      } else {
+        trendDetails = `${recentGoodFeelings} out of ${recent.length} recent meals felt good`;
       }
     }
 
@@ -285,6 +493,7 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       safeRatio,
       topSymptoms,
       feelingDistribution: {
+        excellent: feelingDistribution.excellent || 0,
         great: feelingDistribution.great || 0,
         good: feelingDistribution.good || 0,
         okay: feelingDistribution.okay || 0,
@@ -292,7 +501,11 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
         terrible: feelingDistribution.terrible || 0
       },
       recentTrend,
-      averageSeverity
+      trendDetails,
+      averageSeverity,
+      safeFoods,
+      riskyFoods,
+      foodSymptomAssociations
     };
   };
 
@@ -301,19 +514,41 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
   const generateInsights = () => {
     const insights = [];
 
+    // Safe foods insights
+    if (stats.safeFoods.length > 0) {
+      const topSafeFood = stats.safeFoods[0];
+      insights.push({
+        type: 'positive',
+        title: `${topSafeFood.name} works great for you!`,
+        description: `You've had ${topSafeFood.count} positive experiences with this dish${topSafeFood.restaurant ? ` from ${topSafeFood.restaurant}` : ''}`,
+        icon: <Award className="w-4 h-4" />
+      });
+    }
+
+    // Risky foods insights  
+    if (stats.riskyFoods.length > 0) {
+      const topRiskyFood = stats.riskyFoods[0];
+      insights.push({
+        type: 'warning',
+        title: `Consider avoiding ${topRiskyFood.name}`,
+        description: `This dish caused symptoms ${topRiskyFood.negativeCount} time(s). Common issues: ${topRiskyFood.commonSymptoms.join(', ')}`,
+        icon: <AlertTriangle className="w-4 h-4" />
+      });
+    }
+
     // Trending insights
     if (stats.recentTrend === 'improving') {
       insights.push({
         type: 'positive',
         title: 'Great progress this week!',
-        description: `Your digestive health is trending upward. Keep it up!`,
+        description: stats.trendDetails || 'Your digestive health is trending upward. Keep it up!',
         icon: <TrendingUp className="w-4 h-4" />
       });
     } else if (stats.recentTrend === 'concerning') {
       insights.push({
         type: 'warning',
         title: 'Watch your recent choices',
-        description: `More symptoms than usual this week. Consider reviewing your meals.`,
+        description: stats.trendDetails || 'More symptoms than usual this week.',
         icon: <TrendingDown className="w-4 h-4" />
       });
     }
@@ -330,23 +565,12 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
       insights.push({
         type: 'warning',
         title: 'Room for improvement',
-        description: `Only ${stats.safeRatio}% safe meals. Let's identify your triggers.`,
+        description: `Only ${stats.safeRatio}% safe meals. Focus on your safe foods list below.`,
         icon: <AlertTriangle className="w-4 h-4" />
       });
     }
 
-    // Top symptom insights
-    if (stats.topSymptoms.length > 0) {
-      const topSymptom = stats.topSymptoms[0];
-      insights.push({
-        type: 'tip',
-        title: `Watch out for ${topSymptom.name.toLowerCase()}`,
-        description: `Your most frequent symptom (${topSymptom.count} times, avg severity ${topSymptom.avgSeverity})`,
-        icon: <Activity className="w-4 h-4" />
-      });
-    }
-
-    return insights.slice(0, 3); // Limit to 3 insights
+    return insights.slice(0, 4); // Show up to 4 insights
   };
 
   const getInsightStyle = (type: string) => {
@@ -360,17 +584,55 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
 
   const getFeelingColor = (feeling: string) => {
     switch (feeling) {
-      case 'great': return 'bg-green-500';
-      case 'good': return 'bg-green-400';
-      case 'okay': return 'bg-yellow-500';
-      case 'not-good': return 'bg-orange-500';
-      case 'terrible': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'excellent': return '#10b981'; // emerald-500
+      case 'great': return '#22c55e'; // green-500
+      case 'good': return '#4ade80'; // green-400
+      case 'okay': return '#eab308'; // yellow-500
+      case 'not-good': return '#f97316'; // orange-500
+      case 'terrible': return '#ef4444'; // red-500
+      default: return '#6b7280'; // gray-500
+    }
+  };
+
+  const getFeelingBgClass = (feeling: string) => {
+    switch (feeling) {
+      case 'excellent': return 'bg-emerald-500/10 border-emerald-500/30';
+      case 'great': return 'bg-green-500/10 border-green-500/30';
+      case 'good': return 'bg-green-400/10 border-green-400/30';
+      case 'okay': return 'bg-yellow-500/10 border-yellow-500/30';
+      case 'not-good': return 'bg-orange-500/10 border-orange-500/30';
+      case 'terrible': return 'bg-red-500/10 border-red-500/30';
+      default: return 'bg-gray-500/10 border-gray-500/30';
+    }
+  };
+
+  const getFeelingIcon = (feeling: string) => {
+    switch (feeling) {
+      case 'excellent': return '🤩';
+      case 'great': return '😊';
+      case 'good': return '🙂';
+      case 'okay': return '😐';
+      case 'not-good': return '😔';
+      case 'terrible': return '😞';
+      default: return '😐';
+    }
+  };
+
+  const getFeelingDescription = (feeling: string) => {
+    switch (feeling) {
+      case 'excellent': return 'Felt amazing after eating';
+      case 'great': return 'Felt really good after eating';
+      case 'good': return 'Felt good after eating';
+      case 'okay': return 'Felt neutral after eating';
+      case 'not-good': return 'Experienced some discomfort';
+      case 'terrible': return 'Felt quite unwell after eating';
+      default: return 'Unknown feeling';
     }
   };
 
   const getFeelingLabel = (feeling: string) => {
     switch (feeling) {
+      case 'excellent': return 'Excellent';
       case 'great': return 'Great';
       case 'good': return 'Good';
       case 'okay': return 'Okay';
@@ -512,60 +774,25 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
         </div>
       )}
 
-      {/* Feeling Distribution */}
-      <Card className="bg-gray-800 border-gray-700 p-4">
-        <h3 className="text-white mb-3">How You've Been Feeling</h3>
-        <div className="space-y-2">
-          {Object.entries(stats.feelingDistribution)
-            .sort(([,a], [,b]) => b - a)
-            .map(([feeling, count]) => {
-              const percentage = Math.round((count / stats.totalEntries) * 100);
-              return (
-                <div key={feeling} className="flex items-center space-x-3">
-                  <div className="w-16 text-sm text-gray-300 capitalize">
-                    {getFeelingLabel(feeling)}
-                  </div>
-                  <div className="flex-1">
-                    <Progress 
-                      value={percentage} 
-                      className="h-2" 
-                      style={{
-                        '--progress-background': getFeelingColor(feeling)
-                      } as React.CSSProperties}
-                    />
-                  </div>
-                  <div className="text-sm text-gray-400 w-12 text-right">
-                    {count}
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      </Card>
-
-      {/* Top Symptoms */}
-      {stats.topSymptoms.length > 0 && (
+      {/* Safe Foods */}
+      {stats.safeFoods.length > 0 && (
         <Card className="bg-gray-800 border-gray-700 p-4">
-          <h3 className="text-white mb-3">Most Common Symptoms</h3>
+          <h3 className="text-white mb-3">🥗 Your Safe Foods</h3>
+          <p className="text-sm text-gray-400 mb-3">
+            Foods that consistently make you feel great - stick with these!
+          </p>
           <div className="space-y-3">
-            {stats.topSymptoms.map((symptom, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div>
-                  <span className="text-white">{symptom.name}</span>
-                  <div className="flex items-center space-x-1 mt-1">
-                    <span className="text-sm text-gray-400">{symptom.count} times</span>
-                  </div>
+            {stats.safeFoods.map((food, index) => (
+              <div key={index} className="flex items-center justify-between bg-green-600/10 border border-green-600/30 rounded-lg p-3">
+                <div className="flex-1">
+                  <span className="text-white font-medium">{food.name}</span>
+                  {food.restaurant && (
+                    <div className="text-sm text-gray-400">{food.restaurant}</div>
+                  )}
                 </div>
                 <div className="text-right">
-                  <Badge 
-                    variant="outline" 
-                    className={`${
-                      symptom.avgSeverity >= 4 ? 'border-red-400 text-red-300' :
-                      symptom.avgSeverity >= 3 ? 'border-orange-400 text-orange-300' :
-                      'border-yellow-400 text-yellow-300'
-                    }`}
-                  >
-                    {symptom.avgSeverity}/5
+                  <Badge className="bg-green-600/20 text-green-400 border-green-500/30">
+                    {food.count} ✓
                   </Badge>
                 </div>
               </div>
@@ -574,11 +801,197 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
         </Card>
       )}
 
-      {/* Trend Indicator */}
+      {/* Risky Foods */}
+      {stats.riskyFoods.length > 0 && (
+        <Card className="bg-gray-800 border-gray-700 p-4">
+          <h3 className="text-white mb-3">⚠️ Foods to Watch</h3>
+          <p className="text-sm text-gray-400 mb-3">
+            Foods that have caused symptoms - consider avoiding or modifying these
+          </p>
+          <div className="space-y-3">
+            {stats.riskyFoods.map((food, index) => (
+              <div key={index} className="bg-red-600/10 border border-red-600/30 rounded-lg p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <span className="text-white font-medium">{food.name}</span>
+                    {food.restaurant && (
+                      <div className="text-sm text-gray-400">{food.restaurant}</div>
+                    )}
+                  </div>
+                  <Badge className="bg-red-600/20 text-red-400 border-red-500/30">
+                    {food.negativeCount}x
+                  </Badge>
+                </div>
+                {food.commonSymptoms.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {food.commonSymptoms.map((symptom, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs border-orange-400 text-orange-300">
+                        {symptom}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* How You've Been Feeling */}
       <Card className="bg-gray-800 border-gray-700 p-4">
-        <h3 className="text-white mb-3">Recent Trend</h3>
-        <div className="flex items-center space-x-3">
-          <div className={`p-3 rounded-full ${
+        <h3 className="text-white mb-3">😊 How You've Been Feeling</h3>
+        <p className="text-sm text-gray-400 mb-4">
+          Your digestive wellness after meals - this shows how you felt 2-4 hours after eating
+        </p>
+        
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-700/50 rounded-lg p-3">
+            <div className="text-lg font-medium text-white">
+              {stats.safeRatio}%
+            </div>
+            <div className="text-xs text-gray-400">
+              Felt good or better
+            </div>
+          </div>
+          <div className="bg-gray-700/50 rounded-lg p-3">
+            <div className="text-lg font-medium text-white">
+              {Math.round(((stats.feelingDistribution['not-good'] || 0) + (stats.feelingDistribution.terrible || 0)) / stats.totalEntries * 100) || 0}%
+            </div>
+            <div className="text-xs text-gray-400">
+              Experienced discomfort
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Breakdown */}
+        <div className="space-y-3">
+          {Object.entries(stats.feelingDistribution)
+            .filter(([_, count]) => count > 0)
+            .sort(([,a], [,b]) => b - a)
+            .map(([feeling, count]) => {
+              const percentage = Math.round((count / stats.totalEntries) * 100);
+              return (
+                <div key={feeling} className={`border rounded-lg p-3 ${getFeelingBgClass(feeling)}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{getFeelingIcon(feeling)}</span>
+                      <div>
+                        <span className="text-white font-medium">{getFeelingLabel(feeling)}</span>
+                        <div className="text-xs text-gray-400">{getFeelingDescription(feeling)}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-white font-medium">{count} meals</div>
+                      <div className="text-xs text-gray-400">{percentage}%</div>
+                    </div>
+                  </div>
+                  <Progress 
+                    value={percentage} 
+                    className="h-2 bg-gray-700" 
+                    style={{
+                      '--progress-background': getFeelingColor(feeling)
+                    } as React.CSSProperties}
+                  />
+                </div>
+              );
+            })}
+        </div>
+
+        {/* Helpful Note */}
+        <div className="mt-4 p-3 bg-blue-600/10 border border-blue-600/30 rounded-lg">
+          <p className="text-xs text-blue-300">
+            💡 <strong>How this works:</strong> After logging a meal, GutWise asks how you're feeling 2-4 hours later. 
+            This helps identify which foods work well for your digestive system.
+          </p>
+        </div>
+      </Card>
+
+      {/* Potential Food Triggers */}
+      {stats.topSymptoms.length > 0 && (
+        <Card className="bg-gray-800 border-gray-700 p-4">
+          <h3 className="text-white mb-3">🔍 Potential Food Triggers</h3>
+          <p className="text-sm text-gray-400 mb-3">
+            When you experience symptoms, these are the foods you ate 2-4 hours before. These might be your triggers.
+          </p>
+          
+          {/* Explanation Box */}
+          <div className="mb-4 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
+            <p className="text-xs text-yellow-300">
+              <strong>📋 How to read this:</strong> If you ate "Chicken Tikka" and felt bloating 3 hours later, 
+              GutWise connects them as a potential trigger. The more times this happens, the stronger the connection.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {stats.topSymptoms.map((symptom, index) => (
+              <div key={index} className="bg-orange-600/10 border border-orange-600/30 rounded-lg p-4">
+                {/* Symptom Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">😣</span>
+                    <div>
+                      <span className="text-white font-medium capitalize">{symptom.name}</span>
+                      <div className="text-xs text-gray-400">
+                        Experienced {symptom.count} time{symptom.count > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={`${
+                      symptom.avgSeverity >= 4 ? 'border-red-400 text-red-300 bg-red-400/10' :
+                      symptom.avgSeverity >= 3 ? 'border-orange-400 text-orange-300 bg-orange-400/10' :
+                      'border-yellow-400 text-yellow-300 bg-yellow-400/10'
+                    }`}
+                  >
+                    {symptom.avgSeverity}/5 pain level
+                  </Badge>
+                </div>
+
+                {/* Food Triggers */}
+                {symptom.topFoods.length > 0 ? (
+                  <div>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="text-sm text-gray-300 font-medium">🍽️ Foods eaten before this symptom:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {symptom.topFoods.map((food, idx) => (
+                        <div key={idx} className="bg-red-600/20 border border-red-500/30 rounded-lg px-3 py-1">
+                          <span className="text-sm text-red-300">{food}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      💡 Consider avoiding these foods or ask for modifications when ordering
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-2">
+                    <p className="text-sm text-gray-400">
+                      No specific food patterns identified yet. Keep tracking for better insights!
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Action Note */}
+          <div className="mt-4 p-3 bg-blue-600/10 border border-blue-600/30 rounded-lg">
+            <p className="text-xs text-blue-300">
+              <strong>⚡ Quick Tip:</strong> These are patterns, not proof! A food might affect you differently 
+              depending on portion size, preparation, or what else you eat with it. Use this as a starting point for discussion with your healthcare provider.
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* Recent Trend */}
+      <Card className="bg-gray-800 border-gray-700 p-4">
+        <h3 className="text-white mb-3">📈 Recent Trend</h3>
+        <div className="flex items-start space-x-3">
+          <div className={`p-3 rounded-full flex-shrink-0 ${
             stats.recentTrend === 'improving' ? 'bg-green-600' :
             stats.recentTrend === 'concerning' ? 'bg-red-600' :
             'bg-gray-600'
@@ -587,12 +1000,17 @@ export function InsightsDashboard({ onBack, onNavigate }: InsightsDashboardProps
              stats.recentTrend === 'concerning' ? <TrendingDown className="w-5 h-5" /> :
              <Activity className="w-5 h-5" />}
           </div>
-          <div>
-            <div className="text-white capitalize">{stats.recentTrend}</div>
-            <div className="text-sm text-gray-400">
-              {stats.recentTrend === 'improving' ? 'Your digestive health is getting better!' :
-               stats.recentTrend === 'concerning' ? 'Consider reviewing recent meal choices' :
-               'Your digestive health is stable'}
+          <div className="flex-1">
+            <div className="text-white font-medium capitalize mb-1">{stats.recentTrend}</div>
+            <div className="text-sm text-gray-400 mb-2">
+              {stats.trendDetails}
+            </div>
+            <div className="text-xs text-gray-500">
+              {stats.recentTrend === 'improving' ? 
+                'Keep doing what you\'re doing! Focus on your safe foods.' :
+                stats.recentTrend === 'concerning' ? 
+                'Consider reviewing your recent food choices and avoiding risky foods.' :
+                'Your digestive health is stable. Continue tracking for better insights.'}
             </div>
           </div>
         </div>

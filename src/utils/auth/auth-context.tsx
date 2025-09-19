@@ -61,7 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAuthInfo(newAuthInfo);
         setIsTestMode(false);
 
-        // ❌ CosmosDB user profile sync removed intentionally
         // If you later need to sync with another backend, hook it up here.
       } else {
         console.log('Not in Azure App Service, using development mode');
