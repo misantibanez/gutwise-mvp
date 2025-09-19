@@ -33,7 +33,9 @@ Additional features:
 
 ## 🏗️ Tech Stack
 - **Frontend**: Figma (no-code app prototyping)  
-- **Backend**: Azure (Auth, Storage, Edge Functions)  
-- **AI**: Azure OpenAI (recommendations) + Cognitive Services OCR (menus)  
-- **Notifications**: OneSignal / Expo Push (planned)  
+- **Backend**: Azure (Auth, Storage, Functions)  
+- **AI**: Azure OpenAI (recommendations)
+- **Database**: Azure CosmosDB (user profile)
+- **Privacy**: Microsoft Purview (planned)
 
+![alt text](/assets/image.png)
