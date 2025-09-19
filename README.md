@@ -27,7 +27,7 @@ Additional features:
 - 🍽️ **Frictionless logging**: confirm meals with a single tap, photo, or voice  
 - 💊 **Symptom check-ins**: gentle push notifications after meals  
 - 📊 **Personal insights**: identify triggers and safe foods over time  
-- 🔗 **Future-ready integrations**: Flo (menstrual cycle), pill tracker, community support  
+- 🔗 **Future-ready integrations**: Flo (menstrual cycle), pill tracker, community support (planned)
 
 ---
 
@@ -37,5 +37,6 @@ Additional features:
 - **AI**: Azure OpenAI (recommendations)
 - **Database**: Azure CosmosDB (user profile)
 - **Privacy**: Microsoft Purview (planned)
+- **Analytics**: Microsoft Fabric (planned)
 
 ![alt text](/assets/image.png)
